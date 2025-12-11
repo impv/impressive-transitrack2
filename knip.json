@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip/schema.json",
+  "entry": [
+    "src/pages/**/*.{ts,tsx}",
+    "src/app/**/*.{ts,tsx}",
+    "src/components/**/*.{ts,tsx}",
+    "src/hooks/**/*.{ts,tsx}",
+    "src/utils/**/*.{ts,tsx}"
+  ],
+  "ignore": [
+    "next.config.js",
+    ".next/**",
+    "public/**"
+  ],
+  "project": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
+}
