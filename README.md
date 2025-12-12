@@ -1,40 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# TransiTrack 2
 
-## Getting Started
+## 概要
 
-First, run the development server:
+TransiTrackのリニューアル版 - 交通費の申請と管理を効率化するWebアプリケーション
+
+## 追加機能（予定）
+
+
+## 技術スタック
+
+- **フレームワーク**: [Next.js](https://nextjs.org/) (Pages Router)
+- **言語**: TypeScript
+- **スタイリング**: Tailwind CSS
+- **パッケージマネージャー**: pnpm
+- **リンター**: ESLint
+- **フォーマッター**: Prettier
+
+（その他の技術スタックは開発の進行に応じて追加予定）
+
+## 開発環境のセットアップ
+
+### 前提条件
+
+- Node.js 18.x以上
+- pnpm 8.x以上
+
+### インストール
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# リポジトリのクローン
+git clone https://github.com/impv/transitrack2.git
+cd transitrack2
+
+# 依存関係のインストール
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 開発サーバーの起動
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+ブラウザで [http://localhost:3000](http://localhost:3000) を開いて確認してください。
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+### ビルド
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm build
+```
 
-## Learn More
+### 本番環境での起動
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 開発スクリプト
 
-## Deploy on Vercel
+```bash
+# 開発サーバー起動
+pnpm dev
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# 本番ビルド
+pnpm build
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+# 本番サーバー起動
+pnpm start
+
+# ESLintでコードチェック
+pnpm lint
+
+# Prettierでコード整形
+pnpm format
+
+# 未使用の依存関係をチェック
+pnpm knip
+```
