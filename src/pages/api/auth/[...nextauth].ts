@@ -26,7 +26,8 @@ export const authOptions: NextAuthOptions = {
 			const googleProfile = profile as { email_verified?: boolean; email?: string };
 			const { email_verified, email } = googleProfile;
 
-			const isValidAuth = companyDomain && email_verified && email && email.endsWith(companyDomain);
+			const isValidAuth =
+				companyDomain && email_verified && email && email.endsWith(`@${companyDomain}`);
 
 			if (!isValidAuth) {
 				return false;
