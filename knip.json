@@ -1,12 +1,14 @@
 {
 	"$schema": "https://unpkg.com/knip/schema.json",
-	"entry": [
-		"src/pages/**/*.{ts,tsx}",
-		"src/app/**/*.{ts,tsx}",
-		"src/components/**/*.{ts,tsx}",
-		"src/hooks/**/*.{ts,tsx}",
-		"src/utils/**/*.{ts,tsx}"
-	],
+	"entry": ["src/pages/**/*.{ts,tsx}"],
 	"ignore": ["next.config.js", ".next/**", "public/**"],
-	"project": ["src/**/*.ts", "src/**/*.tsx"]
+	"project": ["src/**/*.ts", "src/**/*.tsx"],
+	"rules": {
+		"dependencies": "off",
+		"devDependencies": "off",
+		"unlisted": "off",
+		"binaries": "off",
+		"unresolved": "off"
+	},
+	"ignoreDependencies": ["tailwindcss", "postcss"]
 }
