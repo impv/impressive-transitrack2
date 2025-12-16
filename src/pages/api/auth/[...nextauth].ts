@@ -1,5 +1,6 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { z } from "zod";
 
 const companyDomain = process.env.COMPANY_DOMAIN;
 
@@ -9,6 +10,12 @@ const adminEmails = new Set(
 		.map((e) => e.trim().toLowerCase())
 		.filter(Boolean),
 );
+
+// Zodスキーマを定義
+const GoogleProfileSchema = z.object({
+	email_verified: z.boolean(),
+	email: z.string(),
+});
 
 export const authOptions: NextAuthOptions = {
 	secret: process.env.NEXTAUTH_SECRET,
@@ -22,12 +29,14 @@ export const authOptions: NextAuthOptions = {
 		async signIn({ account, profile, user }) {
 			if (account?.provider !== "google") return false;
 
-			// Googleのプロフィール情報からメール検証とドメインチェック
-			const googleProfile = profile as { email_verified?: boolean; email?: string };
-			const { email_verified, email } = googleProfile;
+			// Zodでバリデーション
+			const parseResult = GoogleProfileSchema.safeParse(profile);
+			if (!parseResult.success) {
+				return false;
+			}
+			const { email_verified, email } = parseResult.data;
 
-			const isValidAuth =
-				companyDomain && email_verified && email && email.endsWith(`@${companyDomain}`);
+			const isValidAuth = companyDomain && email_verified && email.endsWith(`@${companyDomain}`);
 
 			if (!isValidAuth) {
 				return false;
