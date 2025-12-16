@@ -30,6 +30,7 @@ export const authOptions: NextAuthOptions = {
 
       const parseResult = GoogleProfileSchema.safeParse(profile);
       if (!parseResult.success) {
+        console.error("データの形式が不正です", parseResult.error);
         return false;
       }
       const { email_verified, email } = parseResult.data;
