@@ -1,75 +1,76 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
-	"vcs": {
-		"enabled": true,
-		"clientKind": "git",
-		"useIgnoreFile": true
-	},
-	"files": {
-		"ignoreUnknown": true
-	},
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab",
-		"lineWidth": 100,
-		"formatWithErrors": false
-	},
-	"css": {
-		"parser": {
-			"cssModules": true,
-			"tailwindDirectives": true
-		}
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"a11y": {
-				"noAriaUnsupportedElements": "warn",
-				"useAltText": "warn",
-				"useAriaPropsForRole": "warn",
-				"useAriaPropsSupportedByRole": "warn",
-				"useValidAriaProps": "warn",
-				"useValidAriaValues": "warn"
-			},
-			"correctness": {
-				"noChildrenProp": "error",
-				"noUnusedVariables": "error",
-				"useExhaustiveDependencies": "warn",
-				"useHookAtTopLevel": "error",
-				"useJsxKeyInIterable": "error"
-			},
-			"performance": {
-				"noImgElement": "warn"
-			},
-			"security": {
-				"noDangerouslySetInnerHtmlWithChildren": "error"
-			},
-			"style": {
-				"noNamespace": "error",
-				"useConst": "error"
-			},
-			"suspicious": {
-				"noCommentText": "error",
-				"noDuplicateJsxProps": "error",
-				"noExplicitAny": "warn"
-			}
-		}
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double",
-			"jsxQuoteStyle": "double",
-			"semicolons": "always",
-			"trailingCommas": "all"
-		}
-	},
-	"assist": {
-		"enabled": true,
-		"actions": {
-			"source": {
-				"organizeImports": "on"
-			}
-		}
-	}
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "formatWithErrors": false
+  },
+  "css": {
+    "parser": {
+      "cssModules": true,
+      "tailwindDirectives": true
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noAriaUnsupportedElements": "warn",
+        "useAltText": "warn",
+        "useAriaPropsForRole": "warn",
+        "useAriaPropsSupportedByRole": "warn",
+        "useValidAriaProps": "warn",
+        "useValidAriaValues": "warn"
+      },
+      "correctness": {
+        "noChildrenProp": "error",
+        "noUnusedVariables": "error",
+        "useExhaustiveDependencies": "warn",
+        "useHookAtTopLevel": "error",
+        "useJsxKeyInIterable": "error"
+      },
+      "performance": {
+        "noImgElement": "warn"
+      },
+      "security": {
+        "noDangerouslySetInnerHtmlWithChildren": "error"
+      },
+      "style": {
+        "noNamespace": "error",
+        "useConst": "error"
+      },
+      "suspicious": {
+        "noCommentText": "error",
+        "noDuplicateJsxProps": "error",
+        "noExplicitAny": "warn"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
 }
