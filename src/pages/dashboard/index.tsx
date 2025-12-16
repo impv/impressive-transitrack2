@@ -13,6 +13,14 @@ const Dashboard = () => {
   }, [session, status, router]);
 
   // 未ログイン時はリダイレクト中の表示
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-lg">読み込み中...</div>
+      </div>
+    );
+  }
+
   if (!session) {
     return (
       <div className="flex min-h-screen items-center justify-center">
