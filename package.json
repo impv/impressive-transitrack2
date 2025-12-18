@@ -1,9 +1,6 @@
 {
   "name": "transitrack2",
   "version": "0.1.0",
-  "optionalDependencies": {
-    "@biomejs/cli-linux-x64": "2.3.8"
-  },
   "private": true,
   "packageManager": "pnpm@10.24.0",
   "scripts": {
