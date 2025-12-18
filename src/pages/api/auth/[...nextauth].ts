@@ -16,32 +16,10 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-      authorization: {
-        params: {
-          prompt: "select_account",
-        },
-      },
     }),
   ],
   callbacks: {
     async signIn({ account, profile, user }) {
-      console.log("[DB]", {
-        host: (() => {
-          try {
-            return new URL(process.env.DATABASE_URL ?? "").host;
-          } catch {
-            return "invalid";
-          }
-        })(),
-        sslmode: (() => {
-          try {
-            return new URL(process.env.DATABASE_URL ?? "").searchParams.get("sslmode");
-          } catch {
-            return null;
-          }
-        })(),
-      });
-
       if (account?.provider !== "google") return false;
 
       const parseResult = GoogleProfileSchema.safeParse(profile);
@@ -57,14 +35,20 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      await upsertMemberByEmail({
-        email: email.toLowerCase(),
-        name: user.name ?? email,
-        isAdmin: false,
-      });
+      // メンバー情報を追加
+      try {
+        await upsertMemberByEmail({
+          email: email.toLowerCase(),
+          name: user.name ?? email,
+          isAdmin: false,
+        });
 
-      if (user) {
-        user.isAdmin = await checkIsAdmin(email.toLowerCase());
+        if (user) {
+          user.isAdmin = await checkIsAdmin(email.toLowerCase());
+        }
+      } catch (error) {
+        console.error("メンバー情報の更新に失敗しました", error);
+        return false;
       }
       return true;
     },
@@ -72,7 +56,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, user }) {
       if (account && user) {
         token.accessToken = account.access_token;
-        token.id = user?.id;
+        token.id = user.id;
         token.isAdmin = user.isAdmin ?? false;
       }
       return token;
