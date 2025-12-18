@@ -25,6 +25,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.8",
     "@prisma/engines": "^7.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
