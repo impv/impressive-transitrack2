@@ -12,7 +12,7 @@ importers:
         specifier: 6.16.1
         version: 6.16.1
       '@prisma/client':
-        specifier: ^7.0.1
+        specifier: 7.0.1
         version: 7.0.1(prisma@7.0.1(@types/react@19.2.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(typescript@5.9.3)
       dotenv:
         specifier: ^17.2.3
@@ -61,7 +61,7 @@ importers:
         specifier: 5.70.0
         version: 5.70.0(@types/node@20.19.25)(typescript@5.9.3)
       prisma:
-        specifier: ^7.0.1
+        specifier: 7.0.1
         version: 7.0.1(@types/react@19.2.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       tailwindcss:
         specifier: ^4
