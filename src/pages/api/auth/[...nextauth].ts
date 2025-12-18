@@ -1,15 +1,9 @@
+import { checkIsAdmin, upsertMemberByEmail } from "@/lib/db/member";
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { z } from "zod";
 
 const companyDomain = process.env.COMPANY_DOMAIN;
-
-const adminEmails = new Set(
-  (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean),
-);
 
 const GoogleProfileSchema = z.object({
   email_verified: z.boolean(),
@@ -22,10 +16,32 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      authorization: {
+        params: {
+          prompt: "select_account",
+        },
+      },
     }),
   ],
   callbacks: {
     async signIn({ account, profile, user }) {
+      console.log("[DB]", {
+        host: (() => {
+          try {
+            return new URL(process.env.DATABASE_URL ?? "").host;
+          } catch {
+            return "invalid";
+          }
+        })(),
+        sslmode: (() => {
+          try {
+            return new URL(process.env.DATABASE_URL ?? "").searchParams.get("sslmode");
+          } catch {
+            return null;
+          }
+        })(),
+      });
+
       if (account?.provider !== "google") return false;
 
       const parseResult = GoogleProfileSchema.safeParse(profile);
@@ -41,9 +57,14 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      /** TODO: DBが用意できたら差し替え（現在は暫定的に.envで管理者を指定） */
+      await upsertMemberByEmail({
+        email: email.toLowerCase(),
+        name: user.name ?? email,
+        isAdmin: false,
+      });
+
       if (user) {
-        user.isAdmin = adminEmails.has(email.toLowerCase());
+        user.isAdmin = await checkIsAdmin(email.toLowerCase());
       }
       return true;
     },
