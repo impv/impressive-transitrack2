@@ -9,10 +9,7 @@ export const upsertMemberByEmail = async (params: {
 
   return prisma.member.upsert({
     where: { email },
-    update: {
-      name,
-      isAdmin,
-    },
+    update: {},
     create: {
       email,
       name,
