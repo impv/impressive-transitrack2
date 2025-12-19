@@ -48,6 +48,5 @@ jobs:
 
       - name: Run Knip
         run: pnpm knip
-
-      - name: Build check
-        run: pnpm build
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db

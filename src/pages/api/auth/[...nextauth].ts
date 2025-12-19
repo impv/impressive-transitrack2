@@ -1,15 +1,9 @@
+import { checkIsAdmin, upsertMemberByEmail } from "@/lib/db/member";
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { z } from "zod";
 
 const companyDomain = process.env.COMPANY_DOMAIN;
-
-const adminEmails = new Set(
-  (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean),
-);
 
 const GoogleProfileSchema = z.object({
   email_verified: z.boolean(),
@@ -41,9 +35,20 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      /** TODO: DBが用意できたら差し替え（現在は暫定的に.envで管理者を指定） */
-      if (user) {
-        user.isAdmin = adminEmails.has(email.toLowerCase());
+      // メンバー情報を追加
+      try {
+        await upsertMemberByEmail({
+          email: email.toLowerCase(),
+          name: user.name ?? email,
+          isAdmin: false,
+        });
+
+        if (user) {
+          user.isAdmin = await checkIsAdmin(email.toLowerCase());
+        }
+      } catch (error) {
+        console.error("メンバー情報の更新に失敗しました", error);
+        return false;
       }
       return true;
     },
@@ -51,7 +56,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, user }) {
       if (account && user) {
         token.accessToken = account.access_token;
-        token.id = user?.id;
+        token.id = user.id;
         token.isAdmin = user.isAdmin ?? false;
       }
       return token;
