@@ -30,7 +30,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-4xl">
         {/* ヘッダー */}
         <div className="mb-6 rounded-2xl bg-white p-4 shadow-lg sm:mb-8 sm:p-6">
@@ -101,7 +101,7 @@ const Dashboard = () => {
         </div>
 
         {/* お知らせカード */}
-        <div className="mt-4 rounded-2xl bg-linear-to-r from-blue-500 to-indigo-600 p-4 shadow-lg sm:mt-6 sm:p-6">
+        <div className="mt-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 p-4 shadow-lg sm:mt-6 sm:p-6">
           <div className="flex items-start gap-2 sm:gap-3">
             <svg
               className="h-5 w-5 shrink-0 text-white sm:h-6 sm:w-6"
