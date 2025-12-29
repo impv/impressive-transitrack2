@@ -1,8 +1,7 @@
-/** 23日は削除apiのエンドポイントを完成させる index.tsxを参考にする */
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]";
-import { removeMember, updateMember } from "@/server/members/service";
+import { deleteMemberById, updateMemberById } from "@/server/members/repository";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // 認証
@@ -23,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // HTTPメソッド判定
   if (req.method === "DELETE") {
     try {
-      await removeMember(id);
+      await deleteMemberById(id);
       return res.status(200).json({ message: "メンバーを削除しました" });
     } catch (error) {
       console.error(error);
@@ -31,13 +30,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === "PUT") {
     try {
-      const { name, email } = req.body;
+      const { name, email, isAdmin } = req.body;
 
-      if (!name || !email) {
-        return res.status(400).json({ message: "名前とメールアドレスは必須です" });
+      if (!name || !email || typeof isAdmin !== "boolean") {
+        return res.status(400).json({ message: "名前、メールアドレス、管理者権限は必須です" });
       }
 
-      const updatedMember = await updateMember({ id, name, email });
+      const updatedMember = await updateMemberById({ id, name, email, isAdmin });
       return res.status(200).json(updatedMember);
     } catch (error) {
       console.error(error);

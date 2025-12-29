@@ -1,8 +1,7 @@
-// src/pages/api/members/index.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]";
-import { listMembers } from "@/server/members/service";
+import { getAllMembers } from "@/server/members/repository";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // 認証
@@ -18,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const members = await listMembers();
+    const members = await getAllMembers();
     return res.status(200).json(members);
   } catch (error) {
     console.error(error);

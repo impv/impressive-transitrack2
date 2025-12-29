@@ -1,4 +1,5 @@
-import { removeMember } from "@/features/members/apiClient";
+import { removeMember, updateMember } from "@/features/members/apiClient";
+import { Toast } from "@/components/Toast";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -13,9 +14,10 @@ const Dashboard = () => {
     }
   }, [session, status, router]);
 
-  const [members, setMembers] = useState<Array<{ id: string; name: string; email: string }>>([]);
+  const [members, setMembers] = useState<Array<{ id: string; name: string; email: string; isAdmin: boolean }>>([]);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", email: "" });
+  const [editForm, setEditForm] = useState({ name: "", email: "", isAdmin: false });
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -35,37 +37,38 @@ const Dashboard = () => {
     fetchMembers();
   }, []);
 
-  const handleEditClick = (member: { id: string; name: string; email: string }) => {
+  const handleEditClick = (member: { id: string; name: string; email: string; isAdmin: boolean }) => {
     setEditingMemberId(member.id);
-    setEditForm({ name: member.name, email: member.email });
+    setEditForm({ name: member.name, email: member.email, isAdmin: member.isAdmin });
   };
 
   const handleCancelEdit = () => {
     setEditingMemberId(null);
-    setEditForm({ name: "", email: "" });
+    setEditForm({ name: "", email: "", isAdmin: false });
   };
 
   const handleSaveEdit = async (memberId: string) => {
     try {
-      const response = await fetch(`/api/members/${memberId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editForm),
+      await updateMember({
+        id: memberId,
+        name: editForm.name,
+        email: editForm.email,
+        isAdmin: editForm.isAdmin,
       });
-
-      if (response.ok) {
-        setMembers(members.map(m =>
-          m.id === memberId ? { ...m, name: editForm.name, email: editForm.email } : m
-        ));
-        setEditingMemberId(null);
-        setEditForm({ name: "", email: "" });
-      } else {
-        console.error("メンバーの更新に失敗しました");
-      }
+      // ステートを更新
+      setMembers(members.map(m =>
+        m.id === memberId
+          ? { ...m, name: editForm.name, email: editForm.email, isAdmin: editForm.isAdmin }
+          : m
+      ));
+      // 編集モードを終了
+      setEditingMemberId(null);
+      setEditForm({ name: "", email: "", isAdmin: false });
+      // トーストを表示
+      setToast({ message: "メンバー情報を更新しました", type: "success" });
     } catch (error) {
-      console.error("メンバーの更新中にエラーが発生しました", error);
+      console.error("メンバーの更新に失敗しました", error);
+      setToast({ message: "メンバー情報の更新に失敗しました", type: "error" });
     }
   };
 
@@ -163,35 +166,56 @@ const Dashboard = () => {
           <ul className="text-sm text-gray-600 sm:text-base">
             {members.map((member) => (
               <li key={member.id} className="border-b border-gray-200 py-3 last:border-0">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <p>
                     {member.name} ({member.email})
+                    {member.isAdmin && (
+                      <span className="ml-2 inline-block rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                        管理者
+                      </span>
+                    )}
                   </p>
-                  <div>
-                    {/** TODO: 削除する場合に確認ダイアログを出す */}
-                    <button
-                      type="button"
-                      onClick={() => removeMember(member.id)}
-                      className="mt-1 text-xs text-red-500 hover:underline"
-                    >
-                      削除
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleEditClick(member)}
-                      className="mt-1 ml-4 text-xs text-blue-500 hover:underline"
-                    >
-                      編集
-                    </button>
-                  </div>
+                  {session.user?.isAdmin && (
+                    <div>
+                      {/** TODO: 削除する場合に確認ダイアログを出す */}
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await removeMember(member.id);
+                            // ステートから削除
+                            setMembers(members.filter(m => m.id !== member.id));
+                            // トーストを表示
+                            setToast({ message: "メンバーを削除しました", type: "success" });
+                          } catch (error) {
+                            console.error("メンバーの削除に失敗しました", error);
+                            setToast({ message: "メンバーの削除に失敗しました", type: "error" });
+                          }
+                        }}
+                        className="mt-1 text-xs text-red-500 hover:underline"
+                      >
+                        削除
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleEditClick(member)}
+                        className="mt-1 ml-4 text-xs text-blue-500 hover:underline"
+                      >
+                        編集
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* 編集フォーム */}
-                {editingMemberId === member.id && (
+                {session.user?.isAdmin && editingMemberId === member.id && (
                   <div className="mt-3 rounded-lg bg-gray-50 p-4">
                     <div className="space-y-3">
                       <div>
-                        <label htmlFor={`name-${member.id}`} className="block text-xs font-medium text-gray-700 mb-1">
+                        <label
+                          htmlFor={`name-${member.id}`}
+                          className="block text-xs font-medium text-gray-700 mb-1"
+                        >
                           名前
                         </label>
                         <input
@@ -203,7 +227,10 @@ const Dashboard = () => {
                         />
                       </div>
                       <div>
-                        <label htmlFor={`email-${member.id}`} className="block text-xs font-medium text-gray-700 mb-1">
+                        <label
+                          htmlFor={`email-${member.id}`}
+                          className="block text-xs font-medium text-gray-700 mb-1"
+                        >
                           メールアドレス
                         </label>
                         <input
@@ -214,6 +241,45 @@ const Dashboard = () => {
                           className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                         />
                       </div>
+                      <fieldset>
+                        <legend className="block text-xs font-medium text-gray-700 mb-2">
+                          権限
+                        </legend>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              id={`role-user-${member.id}`}
+                              type="radio"
+                              name={`role-${member.id}`}
+                              checked={!editForm.isAdmin}
+                              onChange={() => setEditForm({ ...editForm, isAdmin: false })}
+                              className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <label
+                              htmlFor={`role-user-${member.id}`}
+                              className="text-xs text-gray-700"
+                            >
+                              一般ユーザー
+                            </label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              id={`role-admin-${member.id}`}
+                              type="radio"
+                              name={`role-${member.id}`}
+                              checked={editForm.isAdmin}
+                              onChange={() => setEditForm({ ...editForm, isAdmin: true })}
+                              className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <label
+                              htmlFor={`role-admin-${member.id}`}
+                              className="text-xs text-gray-700"
+                            >
+                              管理者
+                            </label>
+                          </div>
+                        </div>
+                      </fieldset>
                       <div className="flex gap-2">
                         <button
                           type="button"
@@ -264,6 +330,15 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* トースト表示 */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

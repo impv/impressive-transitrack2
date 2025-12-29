@@ -41,14 +41,16 @@ export const updateMemberById = async (params: {
   id: string;
   name: string;
   email: string;
+  isAdmin: boolean;
 }) => {
-  const { id, name, email } = params;
+  const { id, name, email, isAdmin } = params;
 
   return prisma.member.update({
     where: { id },
     data: {
       name,
       email,
+      isAdmin,
     },
   });
 };
