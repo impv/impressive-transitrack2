@@ -52,3 +52,5 @@ next-env.d.ts
 .stylelintcache
 .turbo
 /src/generated/prisma
+
+copilot-instructions.md

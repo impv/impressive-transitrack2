@@ -1,6 +1,7 @@
+import { removeMember } from "@/features/members/apiClient";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const { data: session, status } = useSession();
@@ -11,6 +12,62 @@ const Dashboard = () => {
       router.push("/auth/login");
     }
   }, [session, status, router]);
+
+  const [members, setMembers] = useState<Array<{ id: string; name: string; email: string }>>([]);
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", email: "" });
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const response = await fetch("/api/members");
+        if (response.ok) {
+          const data = await response.json();
+          setMembers(data);
+        } else {
+          console.error("メンバーの取得に失敗しました");
+        }
+      } catch (error) {
+        console.error("メンバーの取得中にエラーが発生しました", error);
+      }
+    };
+
+    fetchMembers();
+  }, []);
+
+  const handleEditClick = (member: { id: string; name: string; email: string }) => {
+    setEditingMemberId(member.id);
+    setEditForm({ name: member.name, email: member.email });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMemberId(null);
+    setEditForm({ name: "", email: "" });
+  };
+
+  const handleSaveEdit = async (memberId: string) => {
+    try {
+      const response = await fetch(`/api/members/${memberId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editForm),
+      });
+
+      if (response.ok) {
+        setMembers(members.map(m =>
+          m.id === memberId ? { ...m, name: editForm.name, email: editForm.email } : m
+        ));
+        setEditingMemberId(null);
+        setEditForm({ name: "", email: "" });
+      } else {
+        console.error("メンバーの更新に失敗しました");
+      }
+    } catch (error) {
+      console.error("メンバーの更新中にエラーが発生しました", error);
+    }
+  };
 
   // 未ログイン時はリダイレクト中の表示
   if (status === "loading") {
@@ -98,6 +155,87 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* メンバー一覧カード */}
+        <div className="mt-6 rounded-2xl bg-white p-4 shadow-lg sm:mt-8 sm:p-6">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">メンバー</h2>
+          <ul className="text-sm text-gray-600 sm:text-base">
+            {members.map((member) => (
+              <li key={member.id} className="border-b border-gray-200 py-3 last:border-0">
+                <div className="flex justify-between">
+                  <p>
+                    {member.name} ({member.email})
+                  </p>
+                  <div>
+                    {/** TODO: 削除する場合に確認ダイアログを出す */}
+                    <button
+                      type="button"
+                      onClick={() => removeMember(member.id)}
+                      className="mt-1 text-xs text-red-500 hover:underline"
+                    >
+                      削除
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleEditClick(member)}
+                      className="mt-1 ml-4 text-xs text-blue-500 hover:underline"
+                    >
+                      編集
+                    </button>
+                  </div>
+                </div>
+
+                {/* 編集フォーム */}
+                {editingMemberId === member.id && (
+                  <div className="mt-3 rounded-lg bg-gray-50 p-4">
+                    <div className="space-y-3">
+                      <div>
+                        <label htmlFor={`name-${member.id}`} className="block text-xs font-medium text-gray-700 mb-1">
+                          名前
+                        </label>
+                        <input
+                          id={`name-${member.id}`}
+                          type="text"
+                          value={editForm.name}
+                          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`email-${member.id}`} className="block text-xs font-medium text-gray-700 mb-1">
+                          メールアドレス
+                        </label>
+                        <input
+                          id={`email-${member.id}`}
+                          type="email"
+                          value={editForm.email}
+                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSaveEdit(member.id)}
+                          className="rounded bg-blue-500 px-4 py-2 text-xs font-medium text-white hover:bg-blue-600 focus:outline-none"
+                        >
+                          保存
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          className="rounded border border-gray-300 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
+                        >
+                          キャンセル
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* お知らせカード */}

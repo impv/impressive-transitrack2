@@ -1,4 +1,4 @@
-import { checkIsAdmin, upsertMemberByEmail } from "@/lib/db/member";
+import { checkIsAdmin, upsertMemberByEmail } from "@/server/members/repository";
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { z } from "zod";
