@@ -1,8 +1,6 @@
-// src/features/members/apiClient.ts
-/** TODO: 後で作成する */
-// import type { Member } from "@/types/member";
+import type { Member } from "@/types/member";
 
-export const fetchMembers = async () => {
+export const fetchMembers = async (): Promise<Member[]> => {
   const res = await fetch("/api/members", { method: "GET" });
 
   if (!res.ok) {
@@ -22,7 +20,9 @@ export const removeMember = async (id: string) => {
   return res.json();
 };
 
-export const updateMember = async (params: { id: string; name: string; email: string; isAdmin: boolean }) => {
+export const updateMember = async (
+  params: Pick<Member, "id" | "name" | "email" | "isAdmin">
+): Promise<Member> => {
   const { id, name, email, isAdmin } = params;
 
   const res = await fetch(`/api/members/${id}`, {

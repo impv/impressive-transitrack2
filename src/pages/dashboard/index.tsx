@@ -1,4 +1,4 @@
-import { removeMember, updateMember } from "@/features/members/apiClient";
+import { fetchMembers, removeMember, updateMember } from "@/features/members/apiClient";
 import { Toast } from "@/components/Toast";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -14,30 +14,31 @@ const Dashboard = () => {
     }
   }, [session, status, router]);
 
-  const [members, setMembers] = useState<Array<{ id: string; name: string; email: string; isAdmin: boolean }>>([]);
+  const [members, setMembers] = useState<
+    Array<{ id: string; name: string; email: string; isAdmin: boolean }>
+  >([]);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ name: "", email: "", isAdmin: false });
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
-    const fetchMembers = async () => {
+    const loadMembers = async () => {
       try {
-        const response = await fetch("/api/members");
-        if (response.ok) {
-          const data = await response.json();
-          setMembers(data);
-        } else {
-          console.error("メンバーの取得に失敗しました");
-        }
+        const data = await fetchMembers();
+        setMembers(data);
       } catch (error) {
-        console.error("メンバーの取得中にエラーが発生しました", error);
+        console.error("メンバーの取得に失敗しました", error);
       }
     };
-
-    fetchMembers();
+    loadMembers();
   }, []);
 
-  const handleEditClick = (member: { id: string; name: string; email: string; isAdmin: boolean }) => {
+  const handleEditClick = (member: {
+    id: string;
+    name: string;
+    email: string;
+    isAdmin: boolean;
+  }) => {
     setEditingMemberId(member.id);
     setEditForm({ name: member.name, email: member.email, isAdmin: member.isAdmin });
   };
@@ -56,11 +57,13 @@ const Dashboard = () => {
         isAdmin: editForm.isAdmin,
       });
       // ステートを更新
-      setMembers(members.map(m =>
-        m.id === memberId
-          ? { ...m, name: editForm.name, email: editForm.email, isAdmin: editForm.isAdmin }
-          : m
-      ));
+      setMembers(
+        members.map((m) =>
+          m.id === memberId
+            ? { ...m, name: editForm.name, email: editForm.email, isAdmin: editForm.isAdmin }
+            : m,
+        ),
+      );
       // 編集モードを終了
       setEditingMemberId(null);
       setEditForm({ name: "", email: "", isAdmin: false });
@@ -184,7 +187,7 @@ const Dashboard = () => {
                           try {
                             await removeMember(member.id);
                             // ステートから削除
-                            setMembers(members.filter(m => m.id !== member.id));
+                            setMembers(members.filter((m) => m.id !== member.id));
                             // トーストを表示
                             setToast({ message: "メンバーを削除しました", type: "success" });
                           } catch (error) {
@@ -332,13 +335,7 @@ const Dashboard = () => {
       </div>
 
       {/* トースト表示 */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };
