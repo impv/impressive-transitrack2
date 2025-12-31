@@ -4,16 +4,45 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// TODO: 交通費申請の実装時にexpenseモデルを追加する
 model Member {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
   isAdmin   Boolean  @default(false)
+  expenses  Expense[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Expense {
+  id               String        @id @default(uuid())
+  member           Member        @relation(fields: [memberId], references: [id])
+  memberId         String
+  date             DateTime
+  departureStation String
+  arrivalStation   String
+  amount           Int
+  transport        TransportType
+  tripType         TripType      @default(ONEWAY)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([memberId])
+  @@index([date])
+  @@index([memberId, date])
+}
+
+enum TransportType {
+  TRAIN
+  BUS
+}
+
+enum TripType {
+  ONEWAY
+  ROUNDTRIP
 }
