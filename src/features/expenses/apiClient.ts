@@ -8,8 +8,8 @@ export interface CreateExpenseResponse {
   id: string;
   memberId: string;
   date: string;
-  departureStation: string;
-  arrivalStation: string;
+  departure: string;
+  arrival: string;
   amount: number;
   transport: string;
   createdAt: string;
@@ -35,7 +35,9 @@ export const createExpense = async (params: ExpenseInput): Promise<CreateExpense
   });
 
   if (!res.ok) {
-    const errorData: ApiError = await res.json().catch(() => ({ message: "不明なエラーが発生しました" }));
+    const errorData: ApiError = await res
+      .json()
+      .catch(() => ({ message: "不明なエラーが発生しました" }));
     throw new Error(errorData.message || "交通費申請の作成に失敗しました");
   }
 

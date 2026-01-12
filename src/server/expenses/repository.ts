@@ -1,20 +1,11 @@
+import { prisma } from "@/server/prisma";
+import type { Expense } from "@/types/expenses";
+
 /** 交通費のテーブルを作成。
  * 往復の場合、行きと帰りの2つのレコードを自動的に作成する。
  */
-
-import { prisma } from "@/server/prisma";
-import type { TransportType, TripType } from "@prisma/client";
-
-export const createExpense = async (params: {
-  memberId: string;
-  date: Date;
-  departureStation: string;
-  arrivalStation: string;
-  amount: number;
-  transport: TransportType;
-  tripType: TripType;
-}) => {
-  const { memberId, date, departureStation, arrivalStation, amount, transport, tripType } = params;
+export const createExpense = async (params: Expense) => {
+  const { memberId, date, departure, arrival, amount, transport, tripType } = params;
 
   // 片道の場合は1つのレコードを作成
   if (tripType === "ONEWAY") {
@@ -22,8 +13,8 @@ export const createExpense = async (params: {
       data: {
         memberId,
         date,
-        departureStation,
-        arrivalStation,
+        departure,
+        arrival,
         amount,
         transport,
         tripType,
@@ -38,8 +29,8 @@ export const createExpense = async (params: {
       data: {
         memberId,
         date,
-        departureStation,
-        arrivalStation,
+        departure,
+        arrival,
         amount,
         transport,
         tripType,
@@ -51,8 +42,8 @@ export const createExpense = async (params: {
       data: {
         memberId,
         date,
-        departureStation: arrivalStation,
-        arrivalStation: departureStation,
+        departure: arrival,
+        arrival: departure,
         amount,
         transport,
         tripType,

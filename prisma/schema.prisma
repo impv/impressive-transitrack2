@@ -24,8 +24,8 @@ model Expense {
   member           Member        @relation(fields: [memberId], references: [id])
   memberId         String
   date             DateTime
-  departureStation String
-  arrivalStation   String
+  departure String
+  arrival   String
   amount           Int
   transport        TransportType
   tripType         TripType      @default(ONEWAY)
