@@ -1,8 +1,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import type { ExpenseInput } from "@/types/expenses";
-import { createExpense } from "@/features/expenses/apiClient";
+import { useEffect } from "react";
+import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
 
 const Dashboard = () => {
   const { data: session, status } = useSession();
@@ -14,74 +13,14 @@ const Dashboard = () => {
     }
   }, [session, status, router]);
 
-  /** TODO: カスタムフックにして分離 */
-  // 交通費申請フォームの状態
-  const [expenseForm, setExpenseForm] = useState<ExpenseInput>({
-    date: "",
-    departure: "",
-    arrival: "",
-    amount: 0,
-    transport: "TRAIN",
-    tripType: "ONEWAY",
-  });
-  /** TODO: カスタムフックにして分離 */
-  // ローディングとエラーの状態管理
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-
-  /** TODO: カスタムフックにして分離 */
-  // 交通費申請を送信
-  const handleSubmitExpense = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitError(null);
-    setSubmitSuccess(false);
-
-    // バリデーション
-    if (
-      !expenseForm.date ||
-      !expenseForm.departure ||
-      !expenseForm.arrival ||
-      !expenseForm.amount
-    ) {
-      setSubmitError("全ての項目を入力してください");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await createExpense({
-        date: expenseForm.date,
-        departure: expenseForm.departure,
-        arrival: expenseForm.arrival,
-        amount: expenseForm.amount,
-        transport: expenseForm.transport,
-        tripType: expenseForm.tripType,
-      });
-
-      console.log("交通費申請送信結果:", response);
-      setSubmitSuccess(true);
-
-      // フォームをリセット
-      setExpenseForm({
-        date: "",
-        departure: "",
-        arrival: "",
-        amount: 0,
-        transport: "TRAIN",
-        tripType: "ONEWAY",
-      });
-
-      // 3秒後に成功メッセージを非表示
-      setTimeout(() => setSubmitSuccess(false), 3000);
-    } catch (error) {
-      console.error("交通費申請の送信に失敗しました", error);
-      setSubmitError(error instanceof Error ? error.message : "交通費申請の送信に失敗しました");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    expenseForm,
+    setExpenseForm,
+    handleSubmitExpense,
+    isSubmitting,
+    submitError,
+    submitSuccess,
+  } = useExpenseForm();
 
   // 未ログイン時はリダイレクト中の表示
   if (status === "loading") {

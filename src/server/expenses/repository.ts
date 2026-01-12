@@ -6,13 +6,14 @@ import type { Expense } from "@/types/expenses";
  */
 export const createExpense = async (params: Expense) => {
   const { memberId, date, departure, arrival, amount, transport, tripType } = params;
+  const dateValue = new Date(date);
 
   // 片道の場合は1つのレコードを作成
   if (tripType === "ONEWAY") {
     return prisma.expense.create({
       data: {
         memberId,
-        date,
+        date: dateValue,
         departure,
         arrival,
         amount,
@@ -28,7 +29,7 @@ export const createExpense = async (params: Expense) => {
     const outbound = await tx.expense.create({
       data: {
         memberId,
-        date,
+        date: dateValue,
         departure,
         arrival,
         amount,
@@ -41,7 +42,7 @@ export const createExpense = async (params: Expense) => {
     const inbound = await tx.expense.create({
       data: {
         memberId,
-        date,
+        date: dateValue,
         departure: arrival,
         arrival: departure,
         amount,

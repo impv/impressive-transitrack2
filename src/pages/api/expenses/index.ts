@@ -32,9 +32,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const expense = await createExpense({
       memberId: session.user.id,
-      date: new Date(date),
-      departureStation: departure,
-      arrivalStation: arrival,
+      date,
+      departure,
+      arrival,
       amount: Number(amount),
       transport,
       tripType,
