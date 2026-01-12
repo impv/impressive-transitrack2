@@ -1,10 +1,10 @@
 import type { ExpenseInput } from "@/types/expenses";
 
-export interface ApiError {
+interface ApiError {
   message: string;
 }
 
-export interface CreateExpenseResponse {
+interface CreateExpenseResponse {
   id: string;
   memberId: string;
   date: string;
