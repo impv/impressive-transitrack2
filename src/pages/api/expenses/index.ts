@@ -30,12 +30,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: "tripType の値が不正です" });
     }
 
+    const numAmount = Number(amount);
+    if (Number.isNaN(numAmount) || numAmount <= 0) {
+      return res.status(400).json({ message: "金額は正の数値である必要があります" });
+    }
+
+    const selectedDate = new Date(date);
+    if (Number.isNaN(selectedDate.getTime())) {
+      return res.status(400).json({ message: "有効な日付を入力してください" });
+    }
+
+    const today = new Date();
+    selectedDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      return res.status(400).json({ message: "未来の日付は選択できません" });
+    }
+
     const expenses = await createExpense({
       memberId: session.user.id,
       date,
       departure,
       arrival,
-      amount: Number(amount),
+      amount: numAmount,
       transport,
       tripType,
     });
