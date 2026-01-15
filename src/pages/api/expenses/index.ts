@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: "tripType の値が不正です" });
     }
 
-    const expense = await createExpense({
+    const expenses = await createExpense({
       memberId: session.user.id,
       date,
       departure,
@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       tripType,
     });
 
-    return res.status(201).json(expense);
+    return res.status(201).json(expenses);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "サーバーエラー" });

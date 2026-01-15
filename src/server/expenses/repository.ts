@@ -3,6 +3,7 @@ import type { Expense } from "@/types/expenses";
 
 /** 交通費のテーブルを作成。
  * 往復の場合、行きと帰りの2つのレコードを自動的に作成する。
+ * 戻り値は常に配列形式（片道: 1件、往復: 2件）
  */
 export const createExpense = async (params: Expense) => {
   const { memberId, date, departure, arrival, amount, transport, tripType } = params;
@@ -10,7 +11,7 @@ export const createExpense = async (params: Expense) => {
 
   // 片道の場合は1つのレコードを作成
   if (tripType === "ONEWAY") {
-    return prisma.expense.create({
+    const expense = await prisma.expense.create({
       data: {
         memberId,
         date: dateValue,
@@ -21,6 +22,7 @@ export const createExpense = async (params: Expense) => {
         tripType,
       },
     });
+    return [expense];
   }
 
   // 往復の場合は2つのレコードを作成（片道分の金額をそのまま使用）
@@ -51,6 +53,6 @@ export const createExpense = async (params: Expense) => {
       },
     });
 
-    return { outbound, inbound };
+    return [outbound, inbound];
   });
 };

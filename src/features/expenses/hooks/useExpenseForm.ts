@@ -70,9 +70,7 @@ export const useExpenseForm = (): UseExpenseFormResult => {
       setIsSubmitting(true);
 
       try {
-        const response = await createExpense(expenseForm);
-        console.log("交通費申請送信結果:", response);
-
+        await createExpense(expenseForm);
         setSubmitSuccess(true);
         setExpenseForm(INITIAL_FORM_STATE);
 

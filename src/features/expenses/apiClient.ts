@@ -4,7 +4,7 @@ interface ApiError {
   message: string;
 }
 
-interface CreateExpenseResponse {
+type CreateExpenseResponse = Array<{
   id: string;
   memberId: string;
   date: string;
@@ -12,9 +12,10 @@ interface CreateExpenseResponse {
   arrival: string;
   amount: number;
   transport: string;
+  tripType: string;
   createdAt: string;
   updatedAt: string;
-}
+}>;
 
 export const createExpense = async (params: ExpenseInput): Promise<CreateExpenseResponse> => {
   const { date, departure, arrival, amount, transport, tripType } = params;
