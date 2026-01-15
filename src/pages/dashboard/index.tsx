@@ -185,7 +185,8 @@ const Dashboard = () => {
                 value={expenseForm.amount}
                 onChange={(e) => setExpenseForm({ ...expenseForm, amount: Number(e.target.value) })}
                 placeholder="例: 200"
-                min="0"
+                min="1"
+                step="1"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                 required
               />

@@ -1,4 +1,4 @@
-import { prisma } from "@/server/prisma";
+import { prisma } from "@/lib/prisma";
 import type { Expense } from "@/types/expenses";
 
 /** 交通費のテーブルを作成。

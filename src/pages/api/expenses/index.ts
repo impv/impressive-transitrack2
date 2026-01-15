@@ -35,6 +35,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: "金額は正の数値である必要があります" });
     }
 
+    if (!Number.isInteger(numAmount)) {
+      return res.status(400).json({ message: "金額は整数（円単位）で入力してください" });
+    }
+
     const selectedDate = new Date(date);
     if (Number.isNaN(selectedDate.getTime())) {
       return res.status(400).json({ message: "有効な日付を入力してください" });

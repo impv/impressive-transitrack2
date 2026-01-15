@@ -52,6 +52,17 @@ export const useExpenseForm = (): UseExpenseFormResult => {
         return;
       }
 
+      const numAmount = Number(expenseForm.amount);
+      if (!Number.isFinite(numAmount) || numAmount <= 0) {
+        setSubmitError("金額は正の数値である必要があります");
+        return;
+      }
+
+      if (!Number.isInteger(numAmount)) {
+        setSubmitError("金額は整数（円単位）で入力してください");
+        return;
+      }
+
       const selectedDate = new Date(expenseForm.date);
       if (Number.isNaN(selectedDate.getTime())) {
         setSubmitError("有効な日付を入力してください");
