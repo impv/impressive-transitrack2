@@ -1,0 +1,58 @@
+import { prisma } from "@/lib/prisma";
+import type { Expense } from "@/types/expenses";
+
+/** 交通費のテーブルを作成。
+ * 往復の場合、行きと帰りの2つのレコードを自動的に作成する。
+ * 戻り値は常に配列形式（片道: 1件、往復: 2件）
+ */
+export const createExpense = async (params: Expense) => {
+  const { memberId, date, departure, arrival, amount, transport, tripType } = params;
+  const dateValue = new Date(date);
+
+  // 片道の場合は1つのレコードを作成
+  if (tripType === "ONEWAY") {
+    const expense = await prisma.expense.create({
+      data: {
+        memberId,
+        date: dateValue,
+        departure,
+        arrival,
+        amount,
+        transport,
+        tripType,
+      },
+    });
+    return [expense];
+  }
+
+  // 往復の場合は2つのレコードを作成（片道分の金額をそのまま使用）
+  return prisma.$transaction(async (tx) => {
+    // 行き（出発駅 → 到着駅）
+    const outbound = await tx.expense.create({
+      data: {
+        memberId,
+        date: dateValue,
+        departure,
+        arrival,
+        amount,
+        transport,
+        tripType,
+      },
+    });
+
+    // 帰り（到着駅 → 出発駅）
+    const inbound = await tx.expense.create({
+      data: {
+        memberId,
+        date: dateValue,
+        departure: arrival,
+        arrival: departure,
+        amount,
+        transport,
+        tripType,
+      },
+    });
+
+    return [outbound, inbound];
+  });
+};

@@ -1,4 +1,4 @@
-import { checkIsAdmin, upsertMemberByEmail } from "@/lib/db/member";
+import { upsertMemberByEmail } from "@/lib/db/member";
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { z } from "zod";
@@ -37,14 +37,15 @@ export const authOptions: NextAuthOptions = {
 
       // メンバー情報を追加
       try {
-        await upsertMemberByEmail({
+        const member = await upsertMemberByEmail({
           email: email.toLowerCase(),
           name: user.name ?? email,
           isAdmin: false,
         });
 
         if (user) {
-          user.isAdmin = await checkIsAdmin(email.toLowerCase());
+          user.id = member.id;
+          user.isAdmin = member.isAdmin;
         }
       } catch (error) {
         console.error("メンバー情報の更新に失敗しました", error);

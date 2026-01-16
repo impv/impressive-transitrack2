@@ -17,10 +17,3 @@ export const upsertMemberByEmail = async (params: {
     },
   });
 };
-
-export const checkIsAdmin = async (email: string) => {
-  const member = await prisma.member.findUnique({
-    where: { email },
-  });
-  return member?.isAdmin ?? false;
-};
