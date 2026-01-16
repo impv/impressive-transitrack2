@@ -32,6 +32,7 @@ export const createExpense = async (params: ExpenseInput): Promise<CreateExpense
       amount,
       transport,
       tripType,
+      timezoneOffset: new Date().getTimezoneOffset(), // ユーザーのタイムゾーンオフセット（分単位）
     }),
   });
 

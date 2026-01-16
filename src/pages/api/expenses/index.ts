@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { date, departure, arrival, amount, transport, tripType } = req.body;
+    const { date, departure, arrival, amount, transport, tripType, timezoneOffset } = req.body;
 
     if (!date || !departure || !arrival || !amount || !transport || !tripType) {
       return res.status(400).json({ message: "必須項目が不足しています" });
@@ -44,11 +44,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: "有効な日付を入力してください" });
     }
 
-    const today = new Date();
-    selectedDate.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
+    // ユーザーのタイムゾーンを考慮した日付チェック
+    const now = new Date();
+    const userTimezoneOffset = typeof timezoneOffset === 'number' ? timezoneOffset : 0;
+    // ユーザーのローカル時刻を計算（timezoneOffsetは分単位、符号が逆なので引く）
+    const userLocalTime = new Date(now.getTime() - userTimezoneOffset * 60 * 1000);
+    const todayInUserTZ = userLocalTime.toISOString().split('T')[0];
 
-    if (selectedDate > today) {
+    if (date > todayInUserTZ) {
       return res.status(400).json({ message: "未来の日付は選択できません" });
     }
 
