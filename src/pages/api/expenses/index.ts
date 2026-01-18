@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { createExpense } from "@/server/expenses/repository";
+import { createExpense, getExpensesByMemberId } from "@/server/expenses/repository";
 import { TransportType, TripType } from "@prisma/client";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -10,8 +10,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ message: "未認証です" });
   }
 
+  if (req.method === "GET") {
+    try {
+      const expenses = await getExpensesByMemberId(session.user.id);
+      return res.status(200).json(expenses);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "サーバーエラー" });
+    }
+  }
+
   if (req.method !== "POST") {
-    res.setHeader("Allow", ["POST"]);
+    res.setHeader("Allow", ["GET", "POST"]);
     return res.status(405).end();
   }
 
@@ -46,10 +56,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // ユーザーのタイムゾーンを考慮した日付チェック
     const now = new Date();
-    const userTimezoneOffset = typeof timezoneOffset === 'number' ? timezoneOffset : 0;
+    const userTimezoneOffset = typeof timezoneOffset === "number" ? timezoneOffset : 0;
     // ユーザーのローカル時刻を計算（timezoneOffsetは分単位、符号が逆なので引く）
     const userLocalTime = new Date(now.getTime() - userTimezoneOffset * 60 * 1000);
-    const todayInUserTZ = userLocalTime.toISOString().split('T')[0];
+    const todayInUserTZ = userLocalTime.toISOString().split("T")[0];
 
     if (date > todayInUserTZ) {
       return res.status(400).json({ message: "未来の日付は選択できません" });

@@ -10,4 +10,10 @@ export interface Expense {
   tripType: TripType;
 }
 
+export interface ExpenseRecord extends Expense {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type ExpenseInput = Omit<Expense, "memberId">;

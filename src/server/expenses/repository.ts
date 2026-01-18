@@ -56,3 +56,33 @@ export const createExpense = async (params: Expense) => {
     return [outbound, inbound];
   });
 };
+
+/** 指定したユーザーIDの交通費申請一覧を取得 */
+export const getExpensesByMemberId = async (memberId: string) => {
+  return prisma.expense.findMany({
+    where: { memberId },
+    orderBy: { date: "desc" },
+  });
+};
+
+/** 指定したIDの交通費申請を更新 */
+export const updateExpenseById = async (id: string, data: Partial<Expense>) => {
+  return prisma.expense.update({
+    where: { id },
+    data,
+  });
+};
+
+/** 指定したIDの交通費申請を削除 */
+export const deleteExpenseById = async (id: string) => {
+  return prisma.expense.delete({
+    where: { id },
+  });
+};
+
+/** 指定したIDの交通費申請を取得 */
+export const getExpenseById = async (id: string) => {
+  return prisma.expense.findUnique({
+    where: { id },
+  });
+};
