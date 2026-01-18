@@ -46,8 +46,9 @@ export const createExpense = async (params: ExpenseInput): Promise<CreateExpense
   return res.json();
 };
 
-export const getExpenses = async (): Promise<CreateExpenseResponse> => {
-  const res = await fetch("/api/expenses", {
+export const getExpenses = async (yearMonth?: string): Promise<CreateExpenseResponse> => {
+  const queryParams = yearMonth ? `?yearMonth=${encodeURIComponent(yearMonth)}` : "";
+  const res = await fetch(`/api/expenses${queryParams}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

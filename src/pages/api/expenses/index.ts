@@ -12,7 +12,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "GET") {
     try {
-      const expenses = await getExpensesByMemberId(session.user.id);
+      const { yearMonth } = req.query;
+      const yearMonthStr = Array.isArray(yearMonth) ? yearMonth[0] : yearMonth;
+
+      // yearMonth が指定されている場合はフィルタリング、未指定の場合は全件取得
+      const options = yearMonthStr ? { yearMonth: yearMonthStr } : undefined;
+
+      const expenses = await getExpensesByMemberId(session.user.id, options);
       return res.status(200).json(expenses);
     } catch (error) {
       console.error(error);

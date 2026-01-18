@@ -58,9 +58,29 @@ export const createExpense = async (params: Expense) => {
 };
 
 /** 指定したユーザーIDの交通費申請一覧を取得 */
-export const getExpensesByMemberId = async (memberId: string) => {
+export const getExpensesByMemberId = async (
+  memberId: string,
+  options?: {
+    yearMonth?: string; // YYYY-MM形式
+  },
+) => {
+  /** TODO 型を修正する */
+  const where: any = { memberId };
+
+  // 年月でフィルタリング
+  if (options?.yearMonth) {
+    const [year, month] = options.yearMonth.split("-");
+    const startDate = new Date(Number(year), Number(month) - 1, 1);
+    const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59, 999);
+
+    where.date = {
+      gte: startDate,
+      lte: endDate,
+    };
+  }
+
   return prisma.expense.findMany({
-    where: { memberId },
+    where,
     orderBy: { date: "desc" },
   });
 };
