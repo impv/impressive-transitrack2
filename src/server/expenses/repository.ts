@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Expense } from "@/types/expenses";
+import type { Prisma } from "@prisma/client";
 
 /** 交通費のテーブルを作成。
  * 往復の場合、行きと帰りの2つのレコードを自動的に作成する。
@@ -64,8 +65,7 @@ export const getExpensesByMemberId = async (
     yearMonth?: string; // YYYY-MM形式
   },
 ) => {
-  /** TODO 型を修正する */
-  const where: any = { memberId };
+  const where: Prisma.ExpenseWhereInput = { memberId };
 
   // 年月でフィルタリング
   if (options?.yearMonth) {

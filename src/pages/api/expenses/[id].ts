@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!expense) {
         return res.status(404).json({ message: "対象の申請が見つかりません" });
       }
-      if (expense.memberId !== session.user.id /* && !session.user.isAdmin */) {
+      if (expense.memberId !== session.user.id) {
         return res.status(403).json({ message: "この申請を削除する権限がありません" });
       }
       await deleteExpenseById(expenseId);
