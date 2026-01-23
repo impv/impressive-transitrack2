@@ -9,7 +9,7 @@ ALTER TABLE "Expense" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role can manage all members"
 ON "Member"
 FOR ALL
-TO authenticated
+TO service_role
 USING (true)
 WITH CHECK (true);
 
@@ -25,7 +25,7 @@ USING (false);
 CREATE POLICY "Service role can manage all expenses"
 ON "Expense"
 FOR ALL
-TO authenticated
+TO service_role
 USING (true)
 WITH CHECK (true);
 

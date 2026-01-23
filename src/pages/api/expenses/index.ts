@@ -4,6 +4,8 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { createExpense, getExpensesByMemberId } from "@/server/expenses/repository";
 import { TransportType, TripType } from "@prisma/client";
 
+const YEAR_MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
   if (!session?.user?.id) {
@@ -15,6 +17,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { yearMonth } = req.query;
       const yearMonthStr = Array.isArray(yearMonth) ? yearMonth[0] : yearMonth;
 
+      if (yearMonthStr && !YEAR_MONTH_PATTERN.test(yearMonthStr)) {
+        return res.status(400).json({ message: "yearMonth は YYYY-MM 形式で指定してください" });
+      }
+
       // yearMonth が指定されている場合はフィルタリング、未指定の場合は全件取得
       const options = yearMonthStr ? { yearMonth: yearMonthStr } : undefined;
 
@@ -22,6 +28,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(expenses);
     } catch (error) {
       console.error(error);
+      if (error instanceof Error && error.message === "yearMonth must be in YYYY-MM format") {
+        return res.status(400).json({ message: "yearMonth は YYYY-MM 形式で指定してください" });
+      }
       return res.status(500).json({ message: "サーバーエラー" });
     }
   }

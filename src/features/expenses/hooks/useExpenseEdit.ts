@@ -2,6 +2,8 @@ import { useState } from "react";
 import { deleteExpense, updateExpense } from "@/features/expenses/apiClient";
 import type { ExpenseInput, ExpenseRecord } from "@/types/expenses";
 
+type ExpenseEditFormState = Omit<ExpenseInput, "tripType">;
+
 interface UseExpenseEditorOptions {
   onSuccess?: (updated: ExpenseRecord) => void;
   onDeleteSuccess?: (deletedId: string) => void;
@@ -9,13 +11,12 @@ interface UseExpenseEditorOptions {
 }
 
 export const useExpenseEditor = (opts: UseExpenseEditorOptions) => {
-  const [expenseEditForm, setExpenseEditForm] = useState<ExpenseInput>({
+  const [expenseEditForm, setExpenseEditForm] = useState<ExpenseEditFormState>({
     date: "",
     departure: "",
     arrival: "",
     amount: 0,
     transport: "TRAIN",
-    tripType: "ONEWAY",
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +29,6 @@ export const useExpenseEditor = (opts: UseExpenseEditorOptions) => {
       arrival: expense.arrival,
       amount: expense.amount,
       transport: expense.transport,
-      tripType: expense.tripType,
     });
   };
 
@@ -40,7 +40,6 @@ export const useExpenseEditor = (opts: UseExpenseEditorOptions) => {
       arrival: "",
       amount: 0,
       transport: "TRAIN",
-      tripType: "ONEWAY",
     });
   };
 
@@ -75,13 +74,13 @@ export const useExpenseEditor = (opts: UseExpenseEditorOptions) => {
     setIsUpdating(true);
     setError(null);
     try {
-      const payload = {
+      const payload: Partial<ExpenseInput> & { timezoneOffset: number } = {
         date: expenseEditForm.date,
         departure: expenseEditForm.departure,
         arrival: expenseEditForm.arrival,
         amount: expenseEditForm.amount,
         transport: expenseEditForm.transport,
-        tripType: expenseEditForm.tripType,
+        timezoneOffset: new Date().getTimezoneOffset(),
       };
       const response = await updateExpense(expenseId, payload);
       const updatedExpense = {

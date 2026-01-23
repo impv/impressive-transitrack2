@@ -69,6 +69,11 @@ export const getExpensesByMemberId = async (
 
   // 年月でフィルタリング
   if (options?.yearMonth) {
+    const yearMonthPattern = /^\d{4}-(0[1-9]|1[0-2])$/;
+    if (!yearMonthPattern.test(options.yearMonth)) {
+      throw new Error("yearMonth must be in YYYY-MM format");
+    }
+
     const [year, month] = options.yearMonth.split("-");
     const startDate = new Date(Number(year), Number(month) - 1, 1);
     const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59, 999);

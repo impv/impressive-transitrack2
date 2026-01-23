@@ -1,11 +1,32 @@
-import type { TransportType, TripType } from "@prisma/client";
+import { TransportType, TripType } from "@prisma/client";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { getExpenses } from "@/features/expenses/apiClient";
+import type { ExpenseResponseItem } from "@/features/expenses/apiClient";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
 import { useExpenseEditor } from "@/features/expenses/hooks/useExpenseEdit";
 import type { ExpenseRecord } from "@/types/expenses";
+
+const VALID_TRANSPORTS = Object.values(TransportType) as string[];
+const VALID_TRIP_TYPES = Object.values(TripType) as string[];
+
+const normalizeExpenseRecords = (expenses: ExpenseResponseItem[]): ExpenseRecord[] => {
+  return expenses.map((expense) => {
+    if (!VALID_TRANSPORTS.includes(expense.transport)) {
+      throw new Error("不正な transport");
+    }
+    if (!VALID_TRIP_TYPES.includes(expense.tripType)) {
+      throw new Error("不正な tripType");
+    }
+
+    return {
+      ...expense,
+      transport: expense.transport as TransportType,
+      tripType: expense.tripType as TripType,
+    };
+  });
+};
 
 const Dashboard = () => {
   const { data: session, status } = useSession();
@@ -25,20 +46,8 @@ const Dashboard = () => {
     const fetchFilteredExpenses = async () => {
       try {
         const response = await getExpenses(selectedYearMonth);
-        const expenses: ExpenseRecord[] = response.map((r) => {
-          if (!Object.values(["TRAIN", "BUS"]).includes(r.transport)) {
-            throw new Error("不正な transport");
-          }
-          if (!Object.values(["ONEWAY", "ROUNDTRIP"]).includes(r.tripType)) {
-            throw new Error("不正な tripType");
-          }
-          return {
-            ...r,
-            transport: r.transport as TransportType,
-            tripType: r.tripType as TripType,
-          };
-        });
-        setExpenses(expenses);
+        const normalizedExpenses = normalizeExpenseRecords(response);
+        setExpenses(normalizedExpenses);
       } catch (error) {
         console.error("交通費の取得に失敗しました:", error);
       }
@@ -70,12 +79,8 @@ const Dashboard = () => {
       const refetchFiltered = async () => {
         try {
           const response = await getExpenses(selectedYearMonth);
-          const filtered: ExpenseRecord[] = response.map((r) => ({
-            ...r,
-            transport: r.transport as TransportType,
-            tripType: r.tripType as TripType,
-          }));
-          setExpenses(filtered);
+          const normalizedExpenses = normalizeExpenseRecords(response);
+          setExpenses(normalizedExpenses);
         } catch (error) {
           console.error("フィルタリングデータの再取得に失敗:", error);
         }

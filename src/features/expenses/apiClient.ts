@@ -4,7 +4,7 @@ interface ApiError {
   message: string;
 }
 
-type CreateExpenseResponse = Array<{
+export type ExpenseResponseItem = {
   id: string;
   memberId: string;
   date: string;
@@ -15,9 +15,11 @@ type CreateExpenseResponse = Array<{
   tripType: string;
   createdAt: string;
   updatedAt: string;
-}>;
+};
 
-export const createExpense = async (params: ExpenseInput): Promise<CreateExpenseResponse> => {
+type ExpenseResponse = ExpenseResponseItem[];
+
+export const createExpense = async (params: ExpenseInput): Promise<ExpenseResponse> => {
   const { date, departure, arrival, amount, transport, tripType } = params;
 
   const res = await fetch("/api/expenses", {
@@ -46,7 +48,7 @@ export const createExpense = async (params: ExpenseInput): Promise<CreateExpense
   return res.json();
 };
 
-export const getExpenses = async (yearMonth?: string): Promise<CreateExpenseResponse> => {
+export const getExpenses = async (yearMonth?: string): Promise<ExpenseResponse> => {
   const queryParams = yearMonth ? `?yearMonth=${encodeURIComponent(yearMonth)}` : "";
   const res = await fetch(`/api/expenses${queryParams}`, {
     method: "GET",
@@ -83,19 +85,8 @@ export const deleteExpense = async (expenseId: string): Promise<void> => {
 
 export const updateExpense = async (
   expenseId: string,
-  payload: Partial<ExpenseInput>,
-): Promise<{
-  id: string;
-  memberId: string;
-  date: string;
-  departure: string;
-  arrival: string;
-  amount: number;
-  transport: string;
-  tripType: string;
-  createdAt: string;
-  updatedAt: string;
-}> => {
+  payload: Partial<ExpenseInput> & { timezoneOffset?: number },
+): Promise<ExpenseResponseItem> => {
   const res = await fetch(`/api/expenses/${expenseId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
