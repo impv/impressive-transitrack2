@@ -1,11 +1,62 @@
+import { TransportType, TripType } from "@prisma/client";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { getExpenses } from "@/features/expenses/apiClient";
+import type { ExpenseResponseItem } from "@/features/expenses/apiClient";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
+import { useExpenseEditor } from "@/features/expenses/hooks/useExpenseEdit";
+import type { ExpenseRecord } from "@/types/expenses";
+
+const VALID_TRANSPORTS = Object.values(TransportType) as string[];
+const VALID_TRIP_TYPES = Object.values(TripType) as string[];
+
+const normalizeExpenseRecords = (expenses: ExpenseResponseItem[]): ExpenseRecord[] => {
+  return expenses.map((expense) => {
+    if (!VALID_TRANSPORTS.includes(expense.transport)) {
+      throw new Error("不正な transport");
+    }
+    if (!VALID_TRIP_TYPES.includes(expense.tripType)) {
+      throw new Error("不正な tripType");
+    }
+
+    return {
+      ...expense,
+      transport: expense.transport as TransportType,
+      tripType: expense.tripType as TripType,
+    };
+  });
+};
 
 const Dashboard = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
+
+  const getCurrentYearMonth = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  };
+
+  const [selectedYearMonth, setSelectedYearMonth] = useState<string>(getCurrentYearMonth());
+
+  // 選択された年月に基づいてフィルタリングされた交通費を取得
+  useEffect(() => {
+    const fetchFilteredExpenses = async () => {
+      try {
+        const response = await getExpenses(selectedYearMonth);
+        const normalizedExpenses = normalizeExpenseRecords(response);
+        setExpenses(normalizedExpenses);
+      } catch (error) {
+        console.error("交通費の取得に失敗しました:", error);
+      }
+    };
+
+    if (session?.user?.id) {
+      fetchFilteredExpenses();
+    }
+  }, [session?.user?.id, selectedYearMonth]);
 
   useEffect(() => {
     if (status !== "loading" && !session) {
@@ -15,12 +66,76 @@ const Dashboard = () => {
 
   const {
     expenseForm,
-    setExpenseForm,
-    handleSubmitExpense,
     isSubmitting,
     submitError,
     submitSuccess,
+    setExpenseForm,
+    handleSubmitExpense,
   } = useExpenseForm();
+
+  // 新しい申請が成功したらフィルタリングデータを再取得
+  useEffect(() => {
+    if (submitSuccess && session?.user?.id) {
+      const refetchFiltered = async () => {
+        try {
+          const response = await getExpenses(selectedYearMonth);
+          const normalizedExpenses = normalizeExpenseRecords(response);
+          setExpenses(normalizedExpenses);
+        } catch (error) {
+          console.error("フィルタリングデータの再取得に失敗:", error);
+        }
+      };
+
+      refetchFiltered();
+    }
+  }, [submitSuccess, session?.user?.id, selectedYearMonth]);
+
+  // トースト表示用
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimeoutRef = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const {
+    expenseEditForm,
+    selectedExpenseId,
+    isUpdating: isEditUpdating,
+    setExpenseEditForm,
+    submitUpdate,
+    setSelectedExpenseId,
+    handleEditClick,
+    handleDeleteClick,
+  } = useExpenseEditor({
+    expenses: expenses,
+    onSuccess: (updated: ExpenseRecord) => {
+      setExpenses((prev) =>
+        prev.map((p) =>
+          p.id === updated.id
+            ? {
+                ...updated,
+                transport: updated.transport as TransportType,
+                tripType: updated.tripType as TripType,
+              }
+            : p,
+        ),
+      );
+      setToastMessage("申請を更新しました");
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 3000);
+      setSelectedExpenseId(null);
+    },
+    onDeleteSuccess: (deletedId: string) => {
+      setExpenses((prev) => prev.filter((expense) => expense.id !== deletedId));
+      setToastMessage("申請を削除しました");
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 3000);
+    },
+  });
 
   // 未ログイン時はリダイレクト中の表示
   if (status === "loading") {
@@ -110,6 +225,264 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* 交通費申請リストカード */}
+        <div className="mt-6 rounded-2xl bg-white p-4 shadow-lg sm:mt-8 sm:p-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 sm:text-xl">交通費申請一覧</h2>
+            <div className="flex items-center gap-2">
+              <label htmlFor="yearMonthInput" className="text-sm font-medium text-gray-700">
+                表示期間:
+              </label>
+              <input
+                id="yearMonthInput"
+                type="month"
+                value={selectedYearMonth}
+                onChange={(e) => setSelectedYearMonth(e.target.value)}
+                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          {expenses.length === 0 ? (
+            <p className="text-sm text-gray-600">選択した期間に交通費申請がありません。</p>
+          ) : (
+            <ul className="space-y-3">
+              {expenses.map((expense, idx) => {
+                const dateObject = new Date(expense.date);
+                const formattedDate = Number.isNaN(dateObject.getTime())
+                  ? "日付不明"
+                  : dateObject.toLocaleDateString("ja-JP", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    });
+                const amountLabel = expense.amount.toLocaleString("ja-JP");
+                const transportLabel = expense.transport === "TRAIN" ? "電車" : "バス";
+                const tripTypeLabel = expense.tripType === "ROUNDTRIP" ? "往復" : "片道";
+                const tripTypeBadgeClass =
+                  expense.tripType === "ROUNDTRIP"
+                    ? "bg-purple-100 text-purple-700"
+                    : "bg-emerald-100 text-emerald-700";
+                const titleId = `expense-${idx}-title`;
+
+                return (
+                  <li
+                    key={expense.id}
+                    className="transition-transform duration-200 hover:-translate-y-0.5"
+                  >
+                    <article
+                      aria-labelledby={titleId}
+                      className="rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500"
+                    >
+                      <header className="flex flex-wrap items-center justify-between gap-2">
+                        <p id={titleId} className="text-sm font-semibold text-gray-900">
+                          {formattedDate}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
+                            {transportLabel}
+                          </span>
+                          <span
+                            className={`rounded-full px-2 py-1 text-xs font-medium ${tripTypeBadgeClass}`}
+                          >
+                            {tripTypeLabel}
+                          </span>
+                        </div>
+                      </header>
+                      <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700">
+                        <div className="flex items-baseline gap-2">
+                          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                            出発
+                          </dt>
+                          <dd className="text-gray-900">{expense.departure}</dd>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                            到着
+                          </dt>
+                          <dd className="text-gray-900">{expense.arrival}</dd>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                            申請金額
+                          </dt>
+                          <dd className="text-gray-900">{amountLabel}円</dd>
+                        </div>
+                      </dl>
+                      <footer className="mt-4 flex flex-wrap items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEditClick(expense.id)}
+                          className="cursor-pointer rounded-md border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                        >
+                          編集する
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteClick(expense.id)}
+                          className="cursor-pointer rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1"
+                        >
+                          削除する
+                        </button>
+                      </footer>
+                      {/* 編集用アコーディオン */}
+                      {selectedExpenseId === expense.id && (
+                        <div className="mt-4 rounded-lg border-t pt-4">
+                          <form
+                            onSubmit={async (e) => {
+                              e.preventDefault();
+                              try {
+                                await submitUpdate(expense.id);
+                              } catch (err) {
+                                console.error("更新に失敗しました:", err);
+                                alert("更新に失敗しました。入力内容を確認してください。");
+                              }
+                            }}
+                            className="mt-3 space-y-3"
+                          >
+                            <div className="grid grid-cols-1 gap-3">
+                              <div>
+                                <label
+                                  htmlFor={`edit-date-${expense.id}`}
+                                  className="mb-1 block text-xs font-medium text-gray-600"
+                                >
+                                  日付
+                                </label>
+                                <input
+                                  id={`edit-date-${expense.id}`}
+                                  type="date"
+                                  value={expenseEditForm.date}
+                                  onChange={(e) =>
+                                    setExpenseEditForm({ ...expenseEditForm, date: e.target.value })
+                                  }
+                                  className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label
+                                  htmlFor={`edit-departure-${expense.id}`}
+                                  className="mb-1 block text-xs font-medium text-gray-600"
+                                >
+                                  出発
+                                </label>
+                                <input
+                                  id={`edit-departure-${expense.id}`}
+                                  type="text"
+                                  value={expenseEditForm.departure}
+                                  onChange={(e) =>
+                                    setExpenseEditForm({
+                                      ...expenseEditForm,
+                                      departure: e.target.value,
+                                    })
+                                  }
+                                  className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label
+                                  htmlFor={`edit-arrival-${expense.id}`}
+                                  className="mb-1 block text-xs font-medium text-gray-600"
+                                >
+                                  到着
+                                </label>
+                                <input
+                                  id={`edit-arrival-${expense.id}`}
+                                  type="text"
+                                  value={expenseEditForm.arrival}
+                                  onChange={(e) =>
+                                    setExpenseEditForm({
+                                      ...expenseEditForm,
+                                      arrival: e.target.value,
+                                    })
+                                  }
+                                  className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label
+                                  htmlFor={`edit-fare-${expense.id}`}
+                                  className="mb-1 block text-xs font-medium text-gray-600"
+                                >
+                                  運賃（円）
+                                </label>
+                                <input
+                                  id={`edit-fare-${expense.id}`}
+                                  type="number"
+                                  value={expenseEditForm.amount}
+                                  onChange={(e) =>
+                                    setExpenseEditForm({
+                                      ...expenseEditForm,
+                                      amount: Number(e.target.value),
+                                    })
+                                  }
+                                  className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
+                                  min={1}
+                                  step={1}
+                                  required
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <label className="flex items-center gap-2 text-sm">
+                                  <input
+                                    type="radio"
+                                    name={`transport-${expense.id}`}
+                                    value="TRAIN"
+                                    checked={expenseEditForm.transport === "TRAIN"}
+                                    onChange={(e) =>
+                                      setExpenseEditForm({
+                                        ...expenseEditForm,
+                                        transport: e.target.value as TransportType,
+                                      })
+                                    }
+                                  />
+                                  電車
+                                </label>
+                                <label className="flex items-center gap-2 text-sm">
+                                  <input
+                                    type="radio"
+                                    name={`transport-${expense.id}`}
+                                    value="BUS"
+                                    checked={expenseEditForm.transport === "BUS"}
+                                    onChange={(e) =>
+                                      setExpenseEditForm({
+                                        ...expenseEditForm,
+                                        transport: e.target.value as TransportType,
+                                      })
+                                    }
+                                  />
+                                  バス
+                                </label>
+                              </div>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleEditClick(expense.id)}
+                                className="rounded-md border border-gray-200 px-3 py-1 text-sm"
+                              >
+                                キャンセル
+                              </button>
+                              <button
+                                type="submit"
+                                disabled={isEditUpdating}
+                                className="rounded-md bg-blue-600 px-3 py-1 text-sm text-white"
+                              >
+                                {isEditUpdating ? "更新中..." : "更新する"}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+                    </article>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
         {/* 交通費申請フォームカード */}
         <div className="mt-6 rounded-2xl bg-white p-4 shadow-lg sm:mt-8 sm:p-6">
           <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">交通費申請</h2>
@@ -129,7 +502,7 @@ const Dashboard = () => {
           <form onSubmit={handleSubmitExpense} className="space-y-4">
             {/* 日付 */}
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="date" className="mb-1 block text-sm font-medium text-gray-700">
                 日付
               </label>
               <input
@@ -144,7 +517,7 @@ const Dashboard = () => {
 
             {/* 出発駅 */}
             <div>
-              <label htmlFor="departure" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="departure" className="mb-1 block text-sm font-medium text-gray-700">
                 出発駅
               </label>
               <input
@@ -160,7 +533,7 @@ const Dashboard = () => {
 
             {/* 到着駅 */}
             <div>
-              <label htmlFor="arrival" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="arrival" className="mb-1 block text-sm font-medium text-gray-700">
                 到着駅
               </label>
               <input
@@ -176,14 +549,19 @@ const Dashboard = () => {
 
             {/* 運賃 */}
             <div>
-              <label htmlFor="fare" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="fare" className="mb-1 block text-sm font-medium text-gray-700">
                 運賃（円）
               </label>
               <input
                 id="fare"
                 type="number"
                 value={expenseForm.amount}
-                onChange={(e) => setExpenseForm({ ...expenseForm, amount: Number(e.target.value) })}
+                onChange={(e) =>
+                  setExpenseForm({
+                    ...expenseForm,
+                    amount: Number(e.target.value),
+                  })
+                }
                 placeholder="例: 200"
                 min="1"
                 step="1"
@@ -194,9 +572,9 @@ const Dashboard = () => {
 
             {/* 交通手段 */}
             <fieldset>
-              <legend className="block text-sm font-medium text-gray-700 mb-2">交通手段</legend>
+              <legend className="mb-2 block text-sm font-medium text-gray-700">交通手段</legend>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <input
                     type="radio"
                     name="transportation"
@@ -212,7 +590,7 @@ const Dashboard = () => {
                   />
                   <span className="text-sm text-gray-700">電車</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <input
                     type="radio"
                     name="transportation"
@@ -233,9 +611,9 @@ const Dashboard = () => {
 
             {/* 片道/往復 */}
             <fieldset>
-              <legend className="block text-sm font-medium text-gray-700 mb-2">片道/往復</legend>
+              <legend className="mb-2 block text-sm font-medium text-gray-700">片道/往復</legend>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <input
                     type="radio"
                     name="tripType"
@@ -251,7 +629,7 @@ const Dashboard = () => {
                   />
                   <span className="text-sm text-gray-700">片道</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <input
                     type="radio"
                     name="tripType"
@@ -279,12 +657,21 @@ const Dashboard = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:cursor-not-allowed disabled:bg-blue-400"
+              className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:bg-blue-400 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               {isSubmitting ? "送信中..." : "申請する"}
             </button>
           </form>
         </div>
+
+        {/* トースト */}
+        {toastMessage && (
+          <div className="fixed right-6 bottom-6 z-50">
+            <div className="rounded-lg bg-black/90 px-4 py-2 text-sm text-white">
+              {toastMessage}
+            </div>
+          </div>
+        )}
 
         {/* お知らせカード */}
         <div className="mt-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 p-4 shadow-lg sm:mt-6 sm:p-6">

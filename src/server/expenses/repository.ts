@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Expense } from "@/types/expenses";
+import type { Prisma } from "@prisma/client";
 
 /** 交通費のテーブルを作成。
  * 往復の場合、行きと帰りの2つのレコードを自動的に作成する。
@@ -54,5 +55,59 @@ export const createExpense = async (params: Expense) => {
     });
 
     return [outbound, inbound];
+  });
+};
+
+/** 指定したユーザーIDの交通費申請一覧を取得 */
+export const getExpensesByMemberId = async (
+  memberId: string,
+  options?: {
+    yearMonth?: string; // YYYY-MM形式
+  },
+) => {
+  const where: Prisma.ExpenseWhereInput = { memberId };
+
+  // 年月でフィルタリング
+  if (options?.yearMonth) {
+    const yearMonthPattern = /^\d{4}-(0[1-9]|1[0-2])$/;
+    if (!yearMonthPattern.test(options.yearMonth)) {
+      throw new Error("yearMonth must be in YYYY-MM format");
+    }
+
+    const [year, month] = options.yearMonth.split("-");
+    const startDate = new Date(Date.UTC(Number(year), Number(month) - 1, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(Number(year), Number(month), 0, 23, 59, 59, 999));
+
+    where.date = {
+      gte: startDate,
+      lte: endDate,
+    };
+  }
+
+  return prisma.expense.findMany({
+    where,
+    orderBy: { date: "desc" },
+  });
+};
+
+/** 指定したIDの交通費申請を更新 */
+export const updateExpenseById = async (id: string, data: Partial<Expense>) => {
+  return prisma.expense.update({
+    where: { id },
+    data,
+  });
+};
+
+/** 指定したIDの交通費申請を削除 */
+export const deleteExpenseById = async (id: string) => {
+  return prisma.expense.delete({
+    where: { id },
+  });
+};
+
+/** 指定したIDの交通費申請を取得 */
+export const getExpenseById = async (id: string) => {
+  return prisma.expense.findUnique({
+    where: { id },
   });
 };

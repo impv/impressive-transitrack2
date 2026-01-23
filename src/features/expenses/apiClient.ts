@@ -4,7 +4,7 @@ interface ApiError {
   message: string;
 }
 
-type CreateExpenseResponse = Array<{
+export type ExpenseResponseItem = {
   id: string;
   memberId: string;
   date: string;
@@ -15,9 +15,11 @@ type CreateExpenseResponse = Array<{
   tripType: string;
   createdAt: string;
   updatedAt: string;
-}>;
+};
 
-export const createExpense = async (params: ExpenseInput): Promise<CreateExpenseResponse> => {
+type ExpenseResponse = ExpenseResponseItem[];
+
+export const createExpense = async (params: ExpenseInput): Promise<ExpenseResponse> => {
   const { date, departure, arrival, amount, transport, tripType } = params;
 
   const res = await fetch("/api/expenses", {
@@ -43,5 +45,56 @@ export const createExpense = async (params: ExpenseInput): Promise<CreateExpense
     throw new Error(errorData.message || "交通費申請の作成に失敗しました");
   }
 
+  return res.json();
+};
+
+export const getExpenses = async (yearMonth?: string): Promise<ExpenseResponse> => {
+  const queryParams = yearMonth ? `?yearMonth=${encodeURIComponent(yearMonth)}` : "";
+  const res = await fetch(`/api/expenses${queryParams}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const errorData: ApiError = await res
+      .json()
+      .catch(() => ({ message: "不明なエラーが発生しました" }));
+    throw new Error(errorData.message || "交通費申請の取得に失敗しました");
+  }
+
+  return res.json();
+};
+
+export const deleteExpense = async (expenseId: string): Promise<void> => {
+  const res = await fetch(`/api/expenses/${expenseId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const errorData: ApiError = await res
+      .json()
+      .catch(() => ({ message: "不明なエラーが発生しました" }));
+    throw new Error(errorData.message || "交通費申請の削除に失敗しました");
+  }
+};
+
+export const updateExpense = async (
+  expenseId: string,
+  payload: Partial<ExpenseInput> & { timezoneOffset?: number },
+): Promise<ExpenseResponseItem> => {
+  const res = await fetch(`/api/expenses/${expenseId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: "不明なエラー" }));
+    throw new Error(err.message || "更新に失敗しました");
+  }
   return res.json();
 };

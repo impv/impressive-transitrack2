@@ -1,8 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { createExpense } from "@/server/expenses/repository";
+import { createExpense, getExpensesByMemberId } from "@/server/expenses/repository";
 import { TransportType, TripType } from "@prisma/client";
+
+const YEAR_MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -10,8 +12,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ message: "未認証です" });
   }
 
+  if (req.method === "GET") {
+    try {
+      const { yearMonth } = req.query;
+      const yearMonthStr = Array.isArray(yearMonth) ? yearMonth[0] : yearMonth;
+
+      if (yearMonthStr && !YEAR_MONTH_PATTERN.test(yearMonthStr)) {
+        return res.status(400).json({ message: "yearMonth は YYYY-MM 形式で指定してください" });
+      }
+
+      // yearMonth が指定されている場合はフィルタリング、未指定の場合は全件取得
+      const options = yearMonthStr ? { yearMonth: yearMonthStr } : undefined;
+
+      const expenses = await getExpensesByMemberId(session.user.id, options);
+      return res.status(200).json(expenses);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error && error.message === "yearMonth must be in YYYY-MM format") {
+        return res.status(400).json({ message: "yearMonth は YYYY-MM 形式で指定してください" });
+      }
+      return res.status(500).json({ message: "サーバーエラー" });
+    }
+  }
+
   if (req.method !== "POST") {
-    res.setHeader("Allow", ["POST"]);
+    res.setHeader("Allow", ["GET", "POST"]);
     return res.status(405).end();
   }
 
@@ -46,10 +71,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // ユーザーのタイムゾーンを考慮した日付チェック
     const now = new Date();
-    const userTimezoneOffset = typeof timezoneOffset === 'number' ? timezoneOffset : 0;
+    const userTimezoneOffset = typeof timezoneOffset === "number" ? timezoneOffset : 0;
     // ユーザーのローカル時刻を計算（timezoneOffsetは分単位、符号が逆なので引く）
     const userLocalTime = new Date(now.getTime() - userTimezoneOffset * 60 * 1000);
-    const todayInUserTZ = userLocalTime.toISOString().split('T')[0];
+    const todayInUserTZ = userLocalTime.toISOString().split("T")[0];
 
     if (date > todayInUserTZ) {
       return res.status(400).json({ message: "未来の日付は選択できません" });
