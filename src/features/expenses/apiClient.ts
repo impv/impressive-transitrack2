@@ -65,24 +65,6 @@ export const getExpenses = async (yearMonth?: string): Promise<CreateExpenseResp
   return res.json();
 };
 
-export const getExpense = async (expenseId: string): Promise<CreateExpenseResponse[0]> => {
-  const res = await fetch(`/api/expenses/${expenseId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!res.ok) {
-    const errorData: ApiError = await res
-      .json()
-      .catch(() => ({ message: "不明なエラーが発生しました" }));
-    throw new Error(errorData.message || "交通費申請の取得に失敗しました");
-  }
-
-  return res.json();
-};
-
 export const deleteExpense = async (expenseId: string): Promise<void> => {
   const res = await fetch(`/api/expenses/${expenseId}`, {
     method: "DELETE",

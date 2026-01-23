@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { getExpenses } from "@/features/expenses/apiClient";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
-import useExpenseEditor from "@/features/expenses/hooks/useExpenseEdit";
+import { useExpenseEditor } from "@/features/expenses/hooks/useExpenseEdit";
 import type { ExpenseRecord } from "@/types/expenses";
 
 const Dashboard = () => {
@@ -107,7 +107,7 @@ const Dashboard = () => {
     handleDeleteClick,
   } = useExpenseEditor({
     expenses: expenses,
-    onSuccess: (updated) => {
+    onSuccess: (updated: ExpenseRecord) => {
       setExpenses((prev) =>
         prev.map((p) =>
           p.id === updated.id
@@ -124,7 +124,7 @@ const Dashboard = () => {
       toastTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 3000);
       setSelectedExpenseId(null);
     },
-    onDeleteSuccess: (deletedId) => {
+    onDeleteSuccess: (deletedId: string) => {
       setExpenses((prev) => prev.filter((expense) => expense.id !== deletedId));
       setToastMessage("申請を削除しました");
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);

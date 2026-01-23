@@ -114,5 +114,3 @@ export const useExpenseEditor = (opts: UseExpenseEditorOptions) => {
     handleDeleteClick,
   };
 };
-
-export default useExpenseEditor;
