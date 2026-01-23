@@ -75,8 +75,8 @@ export const getExpensesByMemberId = async (
     }
 
     const [year, month] = options.yearMonth.split("-");
-    const startDate = new Date(Number(year), Number(month) - 1, 1);
-    const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59, 999);
+    const startDate = new Date(Date.UTC(Number(year), Number(month) - 1, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(Number(year), Number(month), 0, 23, 59, 59, 999));
 
     where.date = {
       gte: startDate,
