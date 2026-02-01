@@ -111,3 +111,37 @@ export const getExpenseById = async (id: string) => {
     where: { id },
   });
 };
+
+/** 全メンバーの交通費申請一覧を取得（管理者用） */
+export const getAllExpenses = async (options?: { yearMonth?: string }) => {
+  const where: Prisma.ExpenseWhereInput = {};
+
+  if (options?.yearMonth) {
+    const yearMonthPattern = /^\d{4}-(0[1-9]|1[0-2])$/;
+    if (!yearMonthPattern.test(options.yearMonth)) {
+      throw new Error("yearMonth must be in YYYY-MM format");
+    }
+
+    const [year, month] = options.yearMonth.split("-");
+    const startDate = new Date(Date.UTC(Number(year), Number(month) - 1, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(Number(year), Number(month), 0, 23, 59, 59, 999));
+
+    where.date = {
+      gte: startDate,
+      lte: endDate,
+    };
+  }
+
+  return prisma.expense.findMany({
+    where,
+    include: {
+      member: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { date: "desc" },
+  });
+};

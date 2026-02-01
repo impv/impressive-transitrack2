@@ -6,6 +6,7 @@ import { getExpenses } from "@/features/expenses/apiClient";
 import type { ExpenseResponseItem } from "@/features/expenses/apiClient";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
 import { useExpenseEditor } from "@/features/expenses/hooks/useExpenseEdit";
+import { useCsvDownload } from "@/features/expenses/hooks/useCsvDownload";
 import type { ExpenseRecord } from "@/types/expenses";
 
 const VALID_TRANSPORTS = Object.values(TransportType) as string[];
@@ -24,6 +25,7 @@ const normalizeExpenseRecords = (expenses: ExpenseResponseItem[]): ExpenseRecord
       ...expense,
       transport: expense.transport as TransportType,
       tripType: expense.tripType as TripType,
+      member: expense.member,
     };
   });
 };
@@ -137,6 +139,13 @@ const Dashboard = () => {
     },
   });
 
+  // CSVダウンロード
+  const { downloadCsv } = useCsvDownload();
+
+  const handleDownloadCsv = () => {
+    downloadCsv(expenses, session?.user ?? {}, selectedYearMonth);
+  };
+
   // 未ログイン時はリダイレクト中の表示
   if (status === "loading") {
     return (
@@ -225,6 +234,110 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* 交通費合計カード */}
+        <div className="mt-6 rounded-2xl bg-white p-4 shadow-lg sm:mt-8 sm:p-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 sm:text-xl">交通費合計</h2>
+            <div className="flex items-center gap-2">
+              <label htmlFor="summaryYearMonthInput" className="text-sm font-medium text-gray-700">
+                表示期間:
+              </label>
+              <input
+                id="summaryYearMonthInput"
+                type="month"
+                value={selectedYearMonth}
+                onChange={(e) => setSelectedYearMonth(e.target.value)}
+                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleDownloadCsv}
+                className="cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none"
+              >
+                CSVダウンロード
+              </button>
+            </div>
+          </div>
+          {session.user?.isAdmin ? (
+            // 管理者
+            (() => {
+              const memberSummary = expenses.reduce(
+                (acc, expense) => {
+                  const key = expense.memberId;
+                  if (!acc[key]) {
+                    acc[key] = {
+                      name: expense.member?.name ?? "不明",
+                      email: expense.member?.email ?? "",
+                      totalAmount: 0,
+                      expenseCount: 0,
+                    };
+                  }
+                  acc[key].totalAmount += expense.amount;
+                  acc[key].expenseCount += 1;
+                  return acc;
+                },
+                {} as Record<
+                  string,
+                  { name: string; email: string; totalAmount: number; expenseCount: number }
+                >,
+              );
+              const summaryList = Object.entries(memberSummary);
+
+              return summaryList.length === 0 ? (
+                <p className="text-sm text-gray-600">選択した期間にデータがありません。</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500">
+                      <tr>
+                        <th className="px-4 py-3">名前</th>
+                        <th className="px-4 py-3">メールアドレス</th>
+                        <th className="px-4 py-3 text-right">申請件数</th>
+                        <th className="px-4 py-3 text-right">合計金額</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {summaryList.map(([memberId, data]) => (
+                        <tr key={memberId} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <div className="font-medium text-gray-900">{data.name}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-xs text-gray-500">{data.email}</div>
+                          </td>
+                          <td className="px-4 py-3 text-right text-gray-600">
+                            {data.expenseCount}件
+                          </td>
+                          <td className="px-4 py-3 text-right font-medium text-gray-900">
+                            {data.totalAmount.toLocaleString("ja-JP")}円
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()
+          ) : (
+            // 一般ユーザー
+            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+              <div>
+                <p className="text-sm font-medium text-gray-500">合計金額</p>
+                <p className="text-2xl font-bold text-gray-900 sm:text-3xl">
+                  {expenses
+                    .reduce((sum, expense) => sum + expense.amount, 0)
+                    .toLocaleString("ja-JP")}
+                  <span className="ml-1 text-lg font-normal text-gray-600">円</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-500">申請件数</p>
+                <p className="text-xl font-semibold text-gray-900">{expenses.length}件</p>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* 交通費申請リストカード */}
         <div className="mt-6 rounded-2xl bg-white p-4 shadow-lg sm:mt-8 sm:p-6">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -274,9 +387,16 @@ const Dashboard = () => {
                       className="rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500"
                     >
                       <header className="flex flex-wrap items-center justify-between gap-2">
-                        <p id={titleId} className="text-sm font-semibold text-gray-900">
-                          {formattedDate}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p id={titleId} className="text-sm font-semibold text-gray-900">
+                            {formattedDate}
+                          </p>
+                          {expense.member && (
+                            <span className="rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700">
+                              {expense.member.name}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2">
                           <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
                             {transportLabel}

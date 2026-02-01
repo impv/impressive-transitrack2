@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { createExpense, getExpensesByMemberId } from "@/server/expenses/repository";
+import { createExpense, getExpensesByMemberId, getAllExpenses } from "@/server/expenses/repository";
 import { TransportType, TripType } from "@prisma/client";
 
 const YEAR_MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -24,7 +24,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // yearMonth が指定されている場合はフィルタリング、未指定の場合は全件取得
       const options = yearMonthStr ? { yearMonth: yearMonthStr } : undefined;
 
-      const expenses = await getExpensesByMemberId(session.user.id, options);
+      // 管理者の場合は全メンバーの申請を取得、それ以外は自分の申請のみ
+      const expenses = session.user.isAdmin
+        ? await getAllExpenses(options)
+        : await getExpensesByMemberId(session.user.id, options);
       return res.status(200).json(expenses);
     } catch (error) {
       console.error(error);

@@ -15,6 +15,10 @@ export type ExpenseResponseItem = {
   tripType: string;
   createdAt: string;
   updatedAt: string;
+  member?: {
+    name: string;
+    email: string;
+  };
 };
 
 type ExpenseResponse = ExpenseResponseItem[];
