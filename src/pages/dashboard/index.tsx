@@ -34,31 +34,54 @@ const Dashboard = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
-
   const getCurrentYearMonth = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   };
 
-  const [selectedYearMonth, setSelectedYearMonth] = useState<string>(getCurrentYearMonth());
+  // 交通費合計用の年月
+  const [summaryYearMonth, setSummaryYearMonth] = useState<string>(getCurrentYearMonth());
+  // 交通費一覧用の年月
+  const [listYearMonth, setListYearMonth] = useState<string>(getCurrentYearMonth());
 
-  // 選択された年月に基づいてフィルタリングされた交通費を取得
+  // 交通費合計用のデータ
+  const [summaryExpenses, setSummaryExpenses] = useState<ExpenseRecord[]>([]);
+  // 交通費一覧用のデータ
+  const [listExpenses, setListExpenses] = useState<ExpenseRecord[]>([]);
+
+  // 交通費合計用のデータ取得
   useEffect(() => {
-    const fetchFilteredExpenses = async () => {
+    const fetchSummaryExpenses = async () => {
       try {
-        const response = await getExpenses(selectedYearMonth);
+        const response = await getExpenses(summaryYearMonth);
         const normalizedExpenses = normalizeExpenseRecords(response);
-        setExpenses(normalizedExpenses);
+        setSummaryExpenses(normalizedExpenses);
       } catch (error) {
-        console.error("交通費の取得に失敗しました:", error);
+        console.error("交通費合計の取得に失敗しました:", error);
       }
     };
 
     if (session?.user?.id) {
-      fetchFilteredExpenses();
+      fetchSummaryExpenses();
     }
-  }, [session?.user?.id, selectedYearMonth]);
+  }, [session?.user?.id, summaryYearMonth]);
+
+  // 交通費一覧用のデータ取得
+  useEffect(() => {
+    const fetchListExpenses = async () => {
+      try {
+        const response = await getExpenses(listYearMonth);
+        const normalizedExpenses = normalizeExpenseRecords(response);
+        setListExpenses(normalizedExpenses);
+      } catch (error) {
+        console.error("交通費一覧の取得に失敗しました:", error);
+      }
+    };
+
+    if (session?.user?.id) {
+      fetchListExpenses();
+    }
+  }, [session?.user?.id, listYearMonth]);
 
   useEffect(() => {
     if (status !== "loading" && !session) {
@@ -75,22 +98,33 @@ const Dashboard = () => {
     handleSubmitExpense,
   } = useExpenseForm();
 
-  // 新しい申請が成功したらフィルタリングデータを再取得
+  // 新しい申請が成功したらデータを再取得
   useEffect(() => {
     if (submitSuccess && session?.user?.id) {
-      const refetchFiltered = async () => {
+      const refetchData = async () => {
         try {
-          const response = await getExpenses(selectedYearMonth);
-          const normalizedExpenses = normalizeExpenseRecords(response);
-          setExpenses(normalizedExpenses);
+          // 合計用と一覧用が同じ年月なら一度のリクエストで済む
+          if (summaryYearMonth === listYearMonth) {
+            const response = await getExpenses(summaryYearMonth);
+            const normalizedExpenses = normalizeExpenseRecords(response);
+            setSummaryExpenses(normalizedExpenses);
+            setListExpenses(normalizedExpenses);
+          } else {
+            const [summaryResponse, listResponse] = await Promise.all([
+              getExpenses(summaryYearMonth),
+              getExpenses(listYearMonth),
+            ]);
+            setSummaryExpenses(normalizeExpenseRecords(summaryResponse));
+            setListExpenses(normalizeExpenseRecords(listResponse));
+          }
         } catch (error) {
-          console.error("フィルタリングデータの再取得に失敗:", error);
+          console.error("データの再取得に失敗:", error);
         }
       };
 
-      refetchFiltered();
+      refetchData();
     }
-  }, [submitSuccess, session?.user?.id, selectedYearMonth]);
+  }, [submitSuccess, session?.user?.id, summaryYearMonth, listYearMonth]);
 
   // トースト表示用
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -113,9 +147,9 @@ const Dashboard = () => {
     handleEditClick,
     handleDeleteClick,
   } = useExpenseEditor({
-    expenses: expenses,
+    expenses: listExpenses,
     onSuccess: (updated: ExpenseRecord) => {
-      setExpenses((prev) =>
+      const updateExpense = (prev: ExpenseRecord[]) =>
         prev.map((p) =>
           p.id === updated.id
             ? {
@@ -124,15 +158,25 @@ const Dashboard = () => {
                 tripType: updated.tripType as TripType,
               }
             : p,
-        ),
-      );
+        );
+      setListExpenses(updateExpense);
+      // 合計表示も同じ年月なら更新
+      if (summaryYearMonth === listYearMonth) {
+        setSummaryExpenses(updateExpense);
+      }
       setToastMessage("申請を更新しました");
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 3000);
       setSelectedExpenseId(null);
     },
     onDeleteSuccess: (deletedId: string) => {
-      setExpenses((prev) => prev.filter((expense) => expense.id !== deletedId));
+      const filterExpense = (prev: ExpenseRecord[]) =>
+        prev.filter((expense) => expense.id !== deletedId);
+      setListExpenses(filterExpense);
+      // 合計表示も同じ年月なら更新
+      if (summaryYearMonth === listYearMonth) {
+        setSummaryExpenses(filterExpense);
+      }
       setToastMessage("申請を削除しました");
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 3000);
@@ -143,7 +187,7 @@ const Dashboard = () => {
   const { downloadCsv } = useCsvDownload();
 
   const handleDownloadCsv = () => {
-    downloadCsv(expenses, session?.user ?? {}, selectedYearMonth);
+    downloadCsv(summaryExpenses, session?.user ?? {}, summaryYearMonth);
   };
 
   // 未ログイン時はリダイレクト中の表示
@@ -245,8 +289,8 @@ const Dashboard = () => {
               <input
                 id="summaryYearMonthInput"
                 type="month"
-                value={selectedYearMonth}
-                onChange={(e) => setSelectedYearMonth(e.target.value)}
+                value={summaryYearMonth}
+                onChange={(e) => setSummaryYearMonth(e.target.value)}
                 className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
               />
               <button
@@ -261,7 +305,7 @@ const Dashboard = () => {
           {session.user?.isAdmin ? (
             // 管理者
             (() => {
-              const memberSummary = expenses.reduce(
+              const memberSummary = summaryExpenses.reduce(
                 (acc, expense) => {
                   const key = expense.memberId;
                   if (!acc[key]) {
@@ -324,7 +368,7 @@ const Dashboard = () => {
               <div>
                 <p className="text-sm font-medium text-gray-500">合計金額</p>
                 <p className="text-2xl font-bold text-gray-900 sm:text-3xl">
-                  {expenses
+                  {summaryExpenses
                     .reduce((sum, expense) => sum + expense.amount, 0)
                     .toLocaleString("ja-JP")}
                   <span className="ml-1 text-lg font-normal text-gray-600">円</span>
@@ -332,7 +376,7 @@ const Dashboard = () => {
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-500">申請件数</p>
-                <p className="text-xl font-semibold text-gray-900">{expenses.length}件</p>
+                <p className="text-xl font-semibold text-gray-900">{summaryExpenses.length}件</p>
               </div>
             </div>
           )}
@@ -349,17 +393,17 @@ const Dashboard = () => {
               <input
                 id="yearMonthInput"
                 type="month"
-                value={selectedYearMonth}
-                onChange={(e) => setSelectedYearMonth(e.target.value)}
+                value={listYearMonth}
+                onChange={(e) => setListYearMonth(e.target.value)}
                 className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
-          {expenses.length === 0 ? (
+          {listExpenses.length === 0 ? (
             <p className="text-sm text-gray-600">選択した期間に交通費申請がありません。</p>
           ) : (
             <ul className="space-y-3">
-              {expenses.map((expense, idx) => {
+              {listExpenses.map((expense, idx) => {
                 const dateObject = new Date(expense.date);
                 const formattedDate = Number.isNaN(dateObject.getTime())
                   ? "日付不明"
