@@ -313,17 +313,12 @@ const Dashboard = () => {
                       name: expense.member?.name ?? "不明",
                       email: expense.member?.email ?? "",
                       totalAmount: 0,
-                      expenseCount: 0,
                     };
                   }
                   acc[key].totalAmount += expense.amount;
-                  acc[key].expenseCount += 1;
                   return acc;
                 },
-                {} as Record<
-                  string,
-                  { name: string; email: string; totalAmount: number; expenseCount: number }
-                >,
+                {} as Record<string, { name: string; email: string; totalAmount: number }>,
               );
               const summaryList = Object.entries(memberSummary);
 
@@ -336,7 +331,6 @@ const Dashboard = () => {
                       <tr>
                         <th className="px-4 py-3">名前</th>
                         <th className="px-4 py-3">メールアドレス</th>
-                        <th className="px-4 py-3 text-right">申請件数</th>
                         <th className="px-4 py-3 text-right">合計金額</th>
                       </tr>
                     </thead>
@@ -349,9 +343,7 @@ const Dashboard = () => {
                           <td className="px-4 py-3">
                             <div className="text-xs text-gray-500">{data.email}</div>
                           </td>
-                          <td className="px-4 py-3 text-right text-gray-600">
-                            {data.expenseCount}件
-                          </td>
+
                           <td className="px-4 py-3 text-right font-medium text-gray-900">
                             {data.totalAmount.toLocaleString("ja-JP")}円
                           </td>
@@ -373,10 +365,6 @@ const Dashboard = () => {
                     .toLocaleString("ja-JP")}
                   <span className="ml-1 text-lg font-normal text-gray-600">円</span>
                 </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-500">申請件数</p>
-                <p className="text-xl font-semibold text-gray-900">{summaryExpenses.length}件</p>
               </div>
             </div>
           )}
