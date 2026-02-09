@@ -1,4 +1,5 @@
 import type { ExpenseInput } from "@/types/expenses";
+import { TransportType, TripType } from "@prisma/client";
 
 interface ApiError {
   message: string;
@@ -11,8 +12,8 @@ export type ExpenseResponseItem = {
   departure: string;
   arrival: string;
   amount: number;
-  transport: string;
-  tripType: string;
+  transport: TransportType;
+  tripType: TripType;
   createdAt: string;
   updatedAt: string;
   member?: {
