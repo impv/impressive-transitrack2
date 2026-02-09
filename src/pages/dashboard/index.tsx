@@ -916,7 +916,7 @@ const Dashboard = () => {
                   type="text"
                   value={favoriteForm.name}
                   onChange={(e) => setFavoriteForm({ ...favoriteForm, name: e.target.value })}
-                  placeholder="例: 通勤（東京→新宿）"
+                  placeholder="例: よく使う経路（東京駅↔︎渋谷駅）"
                   className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-sm"
                 />
               </div>
@@ -949,7 +949,7 @@ const Dashboard = () => {
                   type="text"
                   value={favoriteForm.arrival}
                   onChange={(e) => setFavoriteForm({ ...favoriteForm, arrival: e.target.value })}
-                  placeholder="例: 新宿駅"
+                  placeholder="例: 渋谷駅"
                   className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-sm"
                   required
                 />

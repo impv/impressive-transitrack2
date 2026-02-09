@@ -19,22 +19,62 @@ const INITIAL_FORM_STATE: FavoriteRouteInput = {
 };
 
 interface UseFavoriteRoutesResult {
+  /**
+   * お気に入り経路一覧
+   */
   favorites: FavoriteRouteResponseItem[];
+  /**
+   * 読み込み中フラグ
+   */
   isLoading: boolean;
+  /**
+   * 取得エラーメッセージ
+   */
   fetchError: string | null;
-
+  /**
+   * お気に入り経路フォームの状態
+   */
   favoriteForm: FavoriteRouteInput;
-  setFavoriteForm: Dispatch<SetStateAction<FavoriteRouteInput>>;
+  /**
+   * 編集中のお気に入り経路ID（新規作成時はnull）
+   */
   editingFavoriteId: string | null;
-
-  handleSaveFavorite: () => Promise<void>;
-  handleEditFavorite: (id: string) => void;
-  handleDeleteFavorite: (id: string) => Promise<void>;
-  handleCancelEdit: () => void;
+  /**
+   * 保存中フラグ
+   */
   isSaving: boolean;
+  /**
+   * 保存エラーメッセージ
+   */
   saveError: string | null;
-
+  /**
+   * お気に入り経路フォームの状態を更新する関数
+   */
+  setFavoriteForm: Dispatch<SetStateAction<FavoriteRouteInput>>;
+  /**
+   * お気に入り経路を保存する関数（新規作成・編集両対応）
+   */
+  handleSaveFavorite: () => Promise<void>;
+  /**
+   *
+   * お気に入り経路を編集モードにする関数
+   */
+  handleEditFavorite: (id: string) => void;
+  /**
+   * お気に入り経路を削除する関数
+   */
+  handleDeleteFavorite: (id: string) => Promise<void>;
+  /**
+   * 編集をキャンセルする関数
+   */
+  handleCancelEdit: () => void;
+  /**
+   * 経費申請フォームからお気に入り経路を保存する関数
+   */
   saveFromExpenseForm: (input: Omit<FavoriteRouteInput, "name">) => Promise<void>;
+  /**
+   * お気に入り経路一覧を再取得する関数
+   */
   refetch: () => Promise<void>;
 }
 
@@ -55,9 +95,7 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
       const data = await getFavoriteRoutes();
       setFavorites(data);
     } catch (error) {
-      setFetchError(
-        error instanceof Error ? error.message : "お気に入り経路の取得に失敗しました",
-      );
+      setFetchError(error instanceof Error ? error.message : "お気に入り経路の取得に失敗しました");
     } finally {
       setIsLoading(false);
     }
@@ -67,6 +105,11 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
     fetchFavorites();
   }, [fetchFavorites]);
 
+  /**
+   * お気に入り経路を保存する関数（新規作成・編集両対応）
+   * handleEditFavorite からeditingFavoriteIdがセットされている場合は更新処理を行い、
+   * そうでない場合は新規作成処理を行う
+   */
   const handleSaveFavorite = useCallback(async () => {
     setSaveError(null);
     if (!favoriteForm.departure || !favoriteForm.arrival || !favoriteForm.amount) {
@@ -91,6 +134,9 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
     }
   }, [favoriteForm, editingFavoriteId]);
 
+  /**
+   * お気に入り経路を編集モードにする関数 (編集の実行は handleSaveFavorite)
+   */
   const handleEditFavorite = useCallback(
     (id: string) => {
       const target = favorites.find((f) => f.id === id);
@@ -108,6 +154,9 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
     [favorites],
   );
 
+  /**
+   * お気に入り経路を削除する関数
+   */
   const handleDeleteFavorite = useCallback(async (id: string) => {
     if (!window.confirm("このお気に入り経路を削除してよろしいですか？")) return;
     try {
@@ -118,12 +167,18 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
     }
   }, []);
 
+  /**
+   * 編集をキャンセルする関数
+   */
   const handleCancelEdit = useCallback(() => {
     setEditingFavoriteId(null);
     setFavoriteForm(INITIAL_FORM_STATE);
     setSaveError(null);
   }, []);
 
+  /**
+   * 経費申請フォームからお気に入り経路を保存する関数
+   */
   const saveFromExpenseForm = useCallback(async (input: Omit<FavoriteRouteInput, "name">) => {
     setIsSaving(true);
     setSaveError(null);
@@ -142,14 +197,14 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
     isLoading,
     fetchError,
     favoriteForm,
-    setFavoriteForm,
     editingFavoriteId,
+    isSaving,
+    saveError,
+    setFavoriteForm,
     handleSaveFavorite,
     handleEditFavorite,
     handleDeleteFavorite,
     handleCancelEdit,
-    isSaving,
-    saveError,
     saveFromExpenseForm,
     refetch: fetchFavorites,
   };
