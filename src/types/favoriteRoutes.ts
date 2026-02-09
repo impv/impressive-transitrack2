@@ -21,15 +21,6 @@ export interface FavoriteRoute {
 }
 
 /**
- * お気に入り経路のレコード型定義
- */
-export interface FavoriteRouteRecord extends FavoriteRoute {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/**
  * お気に入り経路の入力型定義（memberIdを除く）
  */
 export type FavoriteRouteInput = Omit<FavoriteRoute, "memberId">;
