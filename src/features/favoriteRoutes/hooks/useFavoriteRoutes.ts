@@ -147,8 +147,8 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
         departure: target.departure,
         arrival: target.arrival,
         amount: target.amount,
-        transport: target.transport as "TRAIN" | "BUS",
-        tripType: target.tripType as "ONEWAY" | "ROUNDTRIP",
+        transport: target.transport,
+        tripType: target.tripType,
       });
     },
     [favorites],

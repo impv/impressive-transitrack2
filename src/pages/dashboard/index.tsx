@@ -687,8 +687,8 @@ const Dashboard = () => {
                       departure: selected.departure,
                       arrival: selected.arrival,
                       amount: selected.amount,
-                      transport: selected.transport as "TRAIN" | "BUS",
-                      tripType: selected.tripType as "ONEWAY" | "ROUNDTRIP",
+                      transport: selected.transport,
+                      tripType: selected.tripType,
                     });
                   }
                 }}
