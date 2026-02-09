@@ -6,6 +6,7 @@ import { getExpenses } from "@/features/expenses/apiClient";
 import type { ExpenseResponseItem } from "@/features/expenses/apiClient";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
 import { useExpenseEditor } from "@/features/expenses/hooks/useExpenseEdit";
+import { useCsvDownload } from "@/features/expenses/hooks/useCsvDownload";
 import { useFavoriteRoutes } from "@/features/favoriteRoutes/hooks/useFavoriteRoutes";
 import type { ExpenseRecord } from "@/types/expenses";
 
@@ -25,6 +26,7 @@ const normalizeExpenseRecords = (expenses: ExpenseResponseItem[]): ExpenseRecord
       ...expense,
       transport: expense.transport as TransportType,
       tripType: expense.tripType as TripType,
+      member: expense.member,
     };
   });
 };
@@ -33,31 +35,54 @@ const Dashboard = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
-
   const getCurrentYearMonth = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   };
 
-  const [selectedYearMonth, setSelectedYearMonth] = useState<string>(getCurrentYearMonth());
+  // 交通費合計用の年月
+  const [summaryYearMonth, setSummaryYearMonth] = useState<string>(getCurrentYearMonth());
+  // 交通費一覧用の年月
+  const [listYearMonth, setListYearMonth] = useState<string>(getCurrentYearMonth());
 
-  // 選択された年月に基づいてフィルタリングされた交通費を取得
+  // 交通費合計用のデータ
+  const [summaryExpenses, setSummaryExpenses] = useState<ExpenseRecord[]>([]);
+  // 交通費一覧用のデータ
+  const [listExpenses, setListExpenses] = useState<ExpenseRecord[]>([]);
+
+  // 交通費合計用のデータ取得
   useEffect(() => {
-    const fetchFilteredExpenses = async () => {
+    const fetchSummaryExpenses = async () => {
       try {
-        const response = await getExpenses(selectedYearMonth);
+        const response = await getExpenses(summaryYearMonth);
         const normalizedExpenses = normalizeExpenseRecords(response);
-        setExpenses(normalizedExpenses);
+        setSummaryExpenses(normalizedExpenses);
       } catch (error) {
-        console.error("交通費の取得に失敗しました:", error);
+        console.error("交通費合計の取得に失敗しました:", error);
       }
     };
 
     if (session?.user?.id) {
-      fetchFilteredExpenses();
+      fetchSummaryExpenses();
     }
-  }, [session?.user?.id, selectedYearMonth]);
+  }, [session?.user?.id, summaryYearMonth]);
+
+  // 交通費一覧用のデータ取得
+  useEffect(() => {
+    const fetchListExpenses = async () => {
+      try {
+        const response = await getExpenses(listYearMonth);
+        const normalizedExpenses = normalizeExpenseRecords(response);
+        setListExpenses(normalizedExpenses);
+      } catch (error) {
+        console.error("交通費一覧の取得に失敗しました:", error);
+      }
+    };
+
+    if (session?.user?.id) {
+      fetchListExpenses();
+    }
+  }, [session?.user?.id, listYearMonth]);
 
   useEffect(() => {
     if (status !== "loading" && !session) {
@@ -74,22 +99,33 @@ const Dashboard = () => {
     handleSubmitExpense,
   } = useExpenseForm();
 
-  // 新しい申請が成功したらフィルタリングデータを再取得
+  // 新しい申請が成功したらデータを再取得
   useEffect(() => {
     if (submitSuccess && session?.user?.id) {
-      const refetchFiltered = async () => {
+      const refetchData = async () => {
         try {
-          const response = await getExpenses(selectedYearMonth);
-          const normalizedExpenses = normalizeExpenseRecords(response);
-          setExpenses(normalizedExpenses);
+          // 合計用と一覧用が同じ年月なら一度のリクエストで済む
+          if (summaryYearMonth === listYearMonth) {
+            const response = await getExpenses(summaryYearMonth);
+            const normalizedExpenses = normalizeExpenseRecords(response);
+            setSummaryExpenses(normalizedExpenses);
+            setListExpenses(normalizedExpenses);
+          } else {
+            const [summaryResponse, listResponse] = await Promise.all([
+              getExpenses(summaryYearMonth),
+              getExpenses(listYearMonth),
+            ]);
+            setSummaryExpenses(normalizeExpenseRecords(summaryResponse));
+            setListExpenses(normalizeExpenseRecords(listResponse));
+          }
         } catch (error) {
-          console.error("フィルタリングデータの再取得に失敗:", error);
+          console.error("データの再取得に失敗:", error);
         }
       };
 
-      refetchFiltered();
+      refetchData();
     }
-  }, [submitSuccess, session?.user?.id, selectedYearMonth]);
+  }, [submitSuccess, session?.user?.id, summaryYearMonth, listYearMonth]);
 
   // トースト表示用
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -127,9 +163,9 @@ const Dashboard = () => {
     handleEditClick,
     handleDeleteClick,
   } = useExpenseEditor({
-    expenses: expenses,
+    expenses: listExpenses,
     onSuccess: (updated: ExpenseRecord) => {
-      setExpenses((prev) =>
+      const updateExpense = (prev: ExpenseRecord[]) =>
         prev.map((p) =>
           p.id === updated.id
             ? {
@@ -138,20 +174,37 @@ const Dashboard = () => {
                 tripType: updated.tripType as TripType,
               }
             : p,
-        ),
-      );
+        );
+      setListExpenses(updateExpense);
+      // 合計表示も同じ年月なら更新
+      if (summaryYearMonth === listYearMonth) {
+        setSummaryExpenses(updateExpense);
+      }
       setToastMessage("申請を更新しました");
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 3000);
       setSelectedExpenseId(null);
     },
     onDeleteSuccess: (deletedId: string) => {
-      setExpenses((prev) => prev.filter((expense) => expense.id !== deletedId));
+      const filterExpense = (prev: ExpenseRecord[]) =>
+        prev.filter((expense) => expense.id !== deletedId);
+      setListExpenses(filterExpense);
+      // 合計表示も同じ年月なら更新
+      if (summaryYearMonth === listYearMonth) {
+        setSummaryExpenses(filterExpense);
+      }
       setToastMessage("申請を削除しました");
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 3000);
     },
   });
+
+  // CSVダウンロード
+  const { downloadCsv } = useCsvDownload();
+
+  const handleDownloadCsv = () => {
+    downloadCsv(summaryExpenses, session?.user ?? {}, summaryYearMonth);
+  };
 
   // 未ログイン時はリダイレクト中の表示
   if (status === "loading") {
@@ -241,6 +294,98 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* 交通費合計カード */}
+        <div className="mt-6 rounded-2xl bg-white p-4 shadow-lg sm:mt-8 sm:p-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 sm:text-xl">交通費合計</h2>
+            <div className="flex items-center gap-2">
+              <label htmlFor="summaryYearMonthInput" className="text-sm font-medium text-gray-700">
+                表示期間:
+              </label>
+              <input
+                id="summaryYearMonthInput"
+                type="month"
+                value={summaryYearMonth}
+                onChange={(e) => setSummaryYearMonth(e.target.value)}
+                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleDownloadCsv}
+                className="cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none"
+              >
+                CSVダウンロード
+              </button>
+            </div>
+          </div>
+          {session.user?.isAdmin ? (
+            // 管理者
+            (() => {
+              const memberSummary = summaryExpenses.reduce(
+                (acc, expense) => {
+                  const key = expense.memberId;
+                  if (!acc[key]) {
+                    acc[key] = {
+                      name: expense.member?.name ?? "不明",
+                      email: expense.member?.email ?? "",
+                      totalAmount: 0,
+                    };
+                  }
+                  acc[key].totalAmount += expense.amount;
+                  return acc;
+                },
+                {} as Record<string, { name: string; email: string; totalAmount: number }>,
+              );
+              const summaryList = Object.entries(memberSummary);
+
+              return summaryList.length === 0 ? (
+                <p className="text-sm text-gray-600">選択した期間にデータがありません。</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500">
+                      <tr>
+                        <th className="px-4 py-3">名前</th>
+                        <th className="px-4 py-3">メールアドレス</th>
+                        <th className="px-4 py-3 text-right">合計金額</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {summaryList.map(([memberId, data]) => (
+                        <tr key={memberId} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <div className="font-medium text-gray-900">{data.name}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-xs text-gray-500">{data.email}</div>
+                          </td>
+
+                          <td className="px-4 py-3 text-right font-medium text-gray-900">
+                            {data.totalAmount.toLocaleString("ja-JP")}円
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()
+          ) : (
+            // 一般ユーザー
+            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+              <div>
+                <p className="text-sm font-medium text-gray-500">合計金額</p>
+                <p className="text-2xl font-bold text-gray-900 sm:text-3xl">
+                  {summaryExpenses
+                    .reduce((sum, expense) => sum + expense.amount, 0)
+                    .toLocaleString("ja-JP")}
+                  <span className="ml-1 text-lg font-normal text-gray-600">円</span>
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* 交通費申請リストカード */}
         <div className="mt-6 rounded-2xl bg-white p-4 shadow-lg sm:mt-8 sm:p-6">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -252,17 +397,17 @@ const Dashboard = () => {
               <input
                 id="yearMonthInput"
                 type="month"
-                value={selectedYearMonth}
-                onChange={(e) => setSelectedYearMonth(e.target.value)}
+                value={listYearMonth}
+                onChange={(e) => setListYearMonth(e.target.value)}
                 className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
-          {expenses.length === 0 ? (
+          {listExpenses.length === 0 ? (
             <p className="text-sm text-gray-600">選択した期間に交通費申請がありません。</p>
           ) : (
             <ul className="space-y-3">
-              {expenses.map((expense, idx) => {
+              {listExpenses.map((expense, idx) => {
                 const dateObject = new Date(expense.date);
                 const formattedDate = Number.isNaN(dateObject.getTime())
                   ? "日付不明"
@@ -290,9 +435,16 @@ const Dashboard = () => {
                       className="rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500"
                     >
                       <header className="flex flex-wrap items-center justify-between gap-2">
-                        <p id={titleId} className="text-sm font-semibold text-gray-900">
-                          {formattedDate}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p id={titleId} className="text-sm font-semibold text-gray-900">
+                            {formattedDate}
+                          </p>
+                          {expense.member && (
+                            <span className="rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700">
+                              {expense.member.name}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2">
                           <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
                             {transportLabel}
@@ -756,10 +908,7 @@ const Dashboard = () => {
             </h3>
             <div className="space-y-3">
               <div>
-                <label
-                  htmlFor="favName"
-                  className="mb-1 block text-xs font-medium text-gray-600"
-                >
+                <label htmlFor="favName" className="mb-1 block text-xs font-medium text-gray-600">
                   名前（任意）
                 </label>
                 <input
@@ -782,9 +931,7 @@ const Dashboard = () => {
                   id="favDeparture"
                   type="text"
                   value={favoriteForm.departure}
-                  onChange={(e) =>
-                    setFavoriteForm({ ...favoriteForm, departure: e.target.value })
-                  }
+                  onChange={(e) => setFavoriteForm({ ...favoriteForm, departure: e.target.value })}
                   placeholder="例: 東京駅"
                   className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-sm"
                   required
@@ -801,19 +948,14 @@ const Dashboard = () => {
                   id="favArrival"
                   type="text"
                   value={favoriteForm.arrival}
-                  onChange={(e) =>
-                    setFavoriteForm({ ...favoriteForm, arrival: e.target.value })
-                  }
+                  onChange={(e) => setFavoriteForm({ ...favoriteForm, arrival: e.target.value })}
                   placeholder="例: 新宿駅"
                   className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-sm"
                   required
                 />
               </div>
               <div>
-                <label
-                  htmlFor="favAmount"
-                  className="mb-1 block text-xs font-medium text-gray-600"
-                >
+                <label htmlFor="favAmount" className="mb-1 block text-xs font-medium text-gray-600">
                   運賃（円）
                 </label>
                 <input
@@ -914,11 +1056,7 @@ const Dashboard = () => {
                   disabled={isFavoriteSaving}
                   className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white disabled:bg-blue-400 hover:bg-blue-700"
                 >
-                  {isFavoriteSaving
-                    ? "保存中..."
-                    : editingFavoriteId
-                      ? "更新する"
-                      : "登録する"}
+                  {isFavoriteSaving ? "保存中..." : editingFavoriteId ? "更新する" : "登録する"}
                 </button>
               </div>
             </div>
@@ -928,9 +1066,7 @@ const Dashboard = () => {
           {isFavoritesLoading ? (
             <p className="text-sm text-gray-500">読み込み中...</p>
           ) : favorites.length === 0 ? (
-            <p className="text-sm text-gray-600">
-              お気に入り経路がまだ登録されていません。
-            </p>
+            <p className="text-sm text-gray-600">お気に入り経路がまだ登録されていません。</p>
           ) : (
             <ul className="space-y-2">
               {favorites.map((fav) => (

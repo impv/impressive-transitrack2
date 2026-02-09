@@ -14,6 +14,10 @@ export interface ExpenseRecord extends Expense {
   id: string;
   createdAt: string;
   updatedAt: string;
+  member?: {
+    name: string;
+    email: string;
+  };
 }
 
 export type ExpenseInput = Omit<Expense, "memberId">;
