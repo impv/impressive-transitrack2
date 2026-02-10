@@ -10,7 +10,7 @@ interface UseExpenseEditorOptions {
   expenses: ExpenseRecord[];
 }
 
-export const useExpenseEditor = (opts: UseExpenseEditorOptions) => {
+export const useExpenseEdit = (opts: UseExpenseEditorOptions) => {
   const [expenseEditForm, setExpenseEditForm] = useState<ExpenseEditFormState>({
     date: "",
     departure: "",
