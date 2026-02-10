@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { FavoriteRouteResponseItem } from "@/features/favoriteRoutes/apiClient";
 import type { FavoriteRouteInput } from "@/types/favoriteRoutes";
+import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
 
 interface FavoriteRouteManagementProps {
@@ -196,22 +197,24 @@ export const FavoriteRouteManagement = ({
           )}
           <div className="flex gap-2">
             {editingFavoriteId && (
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="md"
                 onClick={handleCancelEdit}
-                className="rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+                className="rounded-md border-gray-200 text-gray-600 shadow-none hover:bg-gray-100 hover:shadow-none"
               >
                 キャンセル
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="md"
               onClick={handleSaveFavorite}
               disabled={isFavoriteSaving}
-              className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white disabled:bg-blue-400 hover:bg-blue-700"
+              className="rounded-md px-4"
             >
               {isFavoriteSaving ? "保存中..." : editingFavoriteId ? "更新する" : "登録する"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -244,20 +247,22 @@ export const FavoriteRouteManagement = ({
                 </p>
               </div>
               <div className="ml-3 flex shrink-0 gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleEditFavorite(fav.id)}
-                  className="cursor-pointer rounded-md border border-blue-200 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                  className="rounded-md"
                 >
                   編集
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => handleDeleteFavorite(fav.id)}
-                  className="cursor-pointer rounded-md border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                  className="rounded-md"
                 >
                   削除
-                </button>
+                </Button>
               </div>
             </li>
           ))}

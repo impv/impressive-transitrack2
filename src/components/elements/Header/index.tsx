@@ -1,4 +1,5 @@
 import { signOut, useSession } from "next-auth/react";
+import { Button } from "@/components/elements/Button";
 
 export const Header = () => {
   const { data: session } = useSession();
@@ -34,13 +35,14 @@ export const Header = () => {
             </li>
           </ul>
         </nav>
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="md"
           onClick={() => signOut()}
-          className="w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none sm:w-auto"
+          className="w-full px-4 sm:w-auto"
         >
           ログアウト
-        </button>
+        </Button>
       </div>
     </header>
   );

@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { useEffect } from "react";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
+import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
 import { useToast } from "@/hooks/useToast";
 import type { FavoriteRouteResponseItem } from "@/features/favoriteRoutes/apiClient";
@@ -257,18 +258,16 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
         </fieldset>
 
         {/* 送信ボタン */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:bg-blue-400 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
+        <Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting}>
           {isSubmitting ? "送信中..." : "申請する"}
-        </button>
+        </Button>
       </form>
 
       {/* この経路をお気に入りに保存 */}
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="md"
+        fullWidth
         disabled={
           isFavoriteSaving || !expenseForm.departure || !expenseForm.arrival || !expenseForm.amount
         }
@@ -282,10 +281,10 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
           });
           showToast("お気に入りに保存しました");
         }}
-        className="mt-3 w-full rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors disabled:cursor-not-allowed disabled:opacity-50 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="mt-3 px-4 py-2"
       >
         {isFavoriteSaving ? "保存中..." : "★ この経路をお気に入りに保存"}
-      </button>
+      </Button>
     </>
   );
 };

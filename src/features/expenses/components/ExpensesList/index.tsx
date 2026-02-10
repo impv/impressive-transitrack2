@@ -7,6 +7,7 @@ import type { TransportType, TripType } from "@prisma/client";
 import { getExpenses } from "@/features/expenses/apiClient";
 import { getCurrentYearMonth } from "@/features/expenses/utils/getCurrentYearMonth";
 import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpenseRecords";
+import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
 
 // 交通費申請一覧カードコンポーネント
@@ -168,20 +169,22 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                       </div>
                     </dl>
                     <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleEditClick(expense.id)}
-                        className="cursor-pointer rounded-md border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                        className="rounded-md px-3 py-1.5 text-xs"
                       >
                         編集する
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
                         onClick={() => handleDeleteClick(expense.id)}
-                        className="cursor-pointer rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1"
+                        className="rounded-md px-3 py-1.5 text-xs"
                       >
                         削除する
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   {/* 編集用アコーディオン */}
@@ -317,20 +320,23 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                           </div>
                         </div>
                         <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
+                          <Button
+                            variant="secondary"
+                            size="md"
                             onClick={() => handleEditClick(expense.id)}
-                            className="rounded-md border border-gray-200 px-3 py-1 text-sm"
+                            className="rounded-md border-gray-200 shadow-none hover:shadow-none"
                           >
                             キャンセル
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             type="submit"
+                            variant="primary"
+                            size="md"
                             disabled={isEditUpdating}
-                            className="rounded-md bg-blue-600 px-3 py-1 text-sm text-white"
+                            className="rounded-md py-1"
                           >
                             {isEditUpdating ? "更新中..." : "更新する"}
-                          </button>
+                          </Button>
                         </div>
                       </form>
                     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { Button } from "@/components/elements/Button";
 import { getExpenses } from "@/features/expenses/apiClient";
 import { useCsvDownload } from "@/features/expenses/hooks/useCsvDownload";
 import type { ExpenseRecord } from "@/types/expenses";
@@ -59,13 +60,9 @@ export const SummaryExpenses = ({ refreshTrigger }: SummaryExpensesProps) => {
             onChange={(e) => setSummaryYearMonth(e.target.value)}
             className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
           />
-          <button
-            type="button"
-            onClick={handleDownloadCsv}
-            className="cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none"
-          >
+          <Button variant="secondary" size="md" onClick={handleDownloadCsv}>
             CSVダウンロード
-          </button>
+          </Button>
         </div>
       </div>
       {session?.user?.isAdmin ? (
