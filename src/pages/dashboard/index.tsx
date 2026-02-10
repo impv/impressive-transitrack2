@@ -2,7 +2,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useToast } from "@/hooks/useToast";
 import { SummaryExpenses } from "@/features/expenses/components/SummaryExpenses";
-import { UserCard } from "@/features/user/components/UserCard.tsx";
+import { UserDetail } from "@/components/elements/UserDetail";
 import { Toast } from "@/components/elements/Toast";
 import { ExpensesList } from "@/features/expenses/components/ExpensesList";
 import { ExpenseForm } from "@/features/expenses/components/ExpenseForm";
@@ -10,7 +10,7 @@ import { Header } from "@/components/elements/Header";
 import { Card } from "@/components/elements/Card";
 import { useEffect, useState } from "react";
 import { FavoriteRouteManagement } from "@/features/expenses/components/FavoriteRouteManagement";
-import { useFavoriteRoutes } from "@/features/favoriteRoutes/hooks/useFavoriteRoutes";
+import { useFavoriteRoutes } from "@/features/expenses/hooks/useFavoriteRoutes";
 
 const Dashboard = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -68,7 +68,9 @@ const Dashboard = () => {
         <Header />
 
         {/* ユーザー情報カード */}
-        <UserCard />
+        <Card>
+          <UserDetail />
+        </Card>
 
         {/* 交通費合計カード */}
         <Card className="mt-6 sm:mt-8">

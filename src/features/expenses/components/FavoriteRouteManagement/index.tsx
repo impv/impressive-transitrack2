@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { FavoriteRouteResponseItem } from "@/features/favoriteRoutes/apiClient";
+import type { FavoriteRouteResponseItem } from "@/features/expenses/favoriteRoutesApiClient";
 import type { FavoriteRouteInput } from "@/types/favoriteRoutes";
 import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";

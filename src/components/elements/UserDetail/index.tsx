@@ -1,12 +1,11 @@
-import { Card } from "@/components/elements/Card";
 import { useSession } from "next-auth/react";
 
-export const UserCard = () => {
+export const UserDetail = () => {
   const { data: session } = useSession();
 
   if (!session) return null;
   return (
-    <Card>
+    <>
       <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl" id="user">
         ユーザー情報
       </h2>
@@ -54,6 +53,6 @@ export const UserCard = () => {
           </div>
         </div>
       </div>
-    </Card>
+    </>
   );
 };
