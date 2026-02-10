@@ -14,9 +14,10 @@ model Member {
   name      String
   email     String   @unique
   isAdmin   Boolean  @default(false)
-  expenses  Expense[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  expenses       Expense[]
+  favoriteRoutes FavoriteRoute[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Expense {
@@ -45,4 +46,20 @@ enum TransportType {
 enum TripType {
   ONEWAY
   ROUNDTRIP
+}
+
+model FavoriteRoute {
+  id        String        @id @default(uuid())
+  member    Member        @relation(fields: [memberId], references: [id])
+  memberId  String
+  name      String        @default("")
+  departure String
+  arrival   String
+  amount    Int
+  transport TransportType
+  tripType  TripType      @default(ONEWAY)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([memberId])
 }

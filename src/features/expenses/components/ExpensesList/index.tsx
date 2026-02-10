@@ -11,6 +11,9 @@ import { Input } from "@/components/elements/Input";
 
 // 交通費申請一覧カードコンポーネント
 interface ExpenseListProps {
+  /**
+   * 交通費データ再取得用トリガー
+   */
   refreshTrigger: number;
 }
 
@@ -143,41 +146,43 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                       </span>
                     </div>
                   </div>
-                  <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700">
-                    <div className="flex items-baseline gap-2">
-                      <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                        出発
-                      </dt>
-                      <dd className="text-gray-900">{expense.departure}</dd>
+                  <div className="flex justify-between items-center">
+                    <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700">
+                      <div className="flex items-baseline gap-2">
+                        <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                          出発
+                        </dt>
+                        <dd className="text-gray-900">{expense.departure}</dd>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                          到着
+                        </dt>
+                        <dd className="text-gray-900">{expense.arrival}</dd>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                          申請金額
+                        </dt>
+                        <dd className="text-gray-900">{amountLabel}円</dd>
+                      </div>
+                    </dl>
+                    <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEditClick(expense.id)}
+                        className="cursor-pointer rounded-md border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                      >
+                        編集する
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteClick(expense.id)}
+                        className="cursor-pointer rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1"
+                      >
+                        削除する
+                      </button>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                        到着
-                      </dt>
-                      <dd className="text-gray-900">{expense.arrival}</dd>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                        申請金額
-                      </dt>
-                      <dd className="text-gray-900">{amountLabel}円</dd>
-                    </div>
-                  </dl>
-                  <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleEditClick(expense.id)}
-                      className="cursor-pointer rounded-md border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-                    >
-                      編集する
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteClick(expense.id)}
-                      className="cursor-pointer rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1"
-                    >
-                      削除する
-                    </button>
                   </div>
                   {/* 編集用アコーディオン */}
                   {selectedExpenseId === expense.id && (
@@ -280,7 +285,7 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                           </div>
                           <div className="flex gap-2">
                             <label className="flex items-center gap-2 text-sm">
-                              <Input
+                              <input
                                 type="radio"
                                 name={`transport-${expense.id}`}
                                 value="TRAIN"
@@ -295,7 +300,7 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                               電車
                             </label>
                             <label className="flex items-center gap-2 text-sm">
-                              <Input
+                              <input
                                 type="radio"
                                 name={`transport-${expense.id}`}
                                 value="BUS"

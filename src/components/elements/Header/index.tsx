@@ -12,18 +12,25 @@ export const Header = () => {
           </p>
         </div>
         <nav>
-          <ul className="flex items-center gap-4">
+          <ul className="flex items-center gap-2 text-sm">
             <li>
               <a href="#user">ユーザー情報</a>
             </li>
+            |
             <li>
               <a href="#summary">交通費合計</a>
             </li>
+            |
             <li>
               <a href="#list">交通費一覧</a>
             </li>
+            |
             <li>
               <a href="#form">交通費申請</a>
+            </li>
+            |
+            <li>
+              <a href="#favorite">お気に入り経路</a>
             </li>
           </ul>
         </nav>

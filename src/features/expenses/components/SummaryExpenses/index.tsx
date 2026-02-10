@@ -9,7 +9,9 @@ import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpe
 // 交通費合計カードコンポーネント
 
 interface SummaryExpensesProps {
-  /* 交通費合計データ再取得用トリガー */
+  /**
+   * 交通費データ再取得用トリガー
+   */
   refreshTrigger?: number;
 }
 

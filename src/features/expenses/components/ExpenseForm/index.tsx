@@ -2,17 +2,38 @@ import type { FC } from "react";
 import { useEffect } from "react";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
 import { Input } from "@/components/elements/Input";
+import { useToast } from "@/hooks/useToast";
+import type { FavoriteRouteResponseItem } from "@/features/favoriteRoutes/apiClient";
+import type { FavoriteRouteInput } from "@/types/favoriteRoutes";
 
 // 交通費申請フォームカードコンポーネント
 interface ExpenseFormProps {
+  /**
+   * お気に入り経路一覧
+   */
+  favorites: FavoriteRouteResponseItem[];
+  /**
+   * お気に入り経路保存中フラグ
+   */
+  isFavoriteSaving: boolean;
   /**
    * 申請の作成/更新が成功したタイミングで呼ばれるコールバック
    * （親側でトースト表示やリストの再取得トリガーを行う用途）
    */
   onSuccess?: () => void;
+  /**
+   * 交通費申請フォームの内容からお気に入り経路を保存する関数
+   */
+  saveFromExpenseForm: (input: Omit<FavoriteRouteInput, "name">) => Promise<void>;
 }
 
-export const ExpenseForm: FC<ExpenseFormProps> = ({ onSuccess }) => {
+export const ExpenseForm: FC<ExpenseFormProps> = ({
+  favorites,
+  isFavoriteSaving,
+  onSuccess,
+  saveFromExpenseForm,
+}) => {
+  const { showToast } = useToast();
   const {
     expenseForm,
     isSubmitting,
@@ -47,13 +68,50 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({ onSuccess }) => {
         </div>
       )}
 
+      {/* お気に入り経路からクイック入力 */}
+      {favorites.length > 0 && (
+        <div className="mb-4">
+          <label htmlFor="favoriteSelect" className="mb-1 block text-sm font-medium text-gray-700">
+            お気に入り経路から入力
+          </label>
+          <select
+            id="favoriteSelect"
+            value=""
+            onChange={(e) => {
+              const selected = favorites.find((f) => f.id === e.target.value);
+              if (selected) {
+                setExpenseForm({
+                  ...expenseForm,
+                  departure: selected.departure,
+                  arrival: selected.arrival,
+                  amount: selected.amount,
+                  transport: selected.transport,
+                  tripType: selected.tripType,
+                });
+              }
+            }}
+            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
+          >
+            <option value="">-- お気に入りを選択 --</option>
+            {favorites.map((fav) => (
+              <option key={fav.id} value={fav.id}>
+                {fav.name || `${fav.departure} → ${fav.arrival}`} (
+                {fav.amount.toLocaleString("ja-JP")}円・
+                {fav.transport === "TRAIN" ? "電車" : "バス"}・
+                {fav.tripType === "ROUNDTRIP" ? "往復" : "片道"})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <form onSubmit={handleSubmitExpense} className="space-y-4">
         {/* 日付 */}
         <div>
           <label htmlFor="date" className="mb-1 block text-sm font-medium text-gray-700">
             日付
           </label>
-          <input
+          <Input
             id="date"
             type="date"
             value={expenseForm.date}
@@ -120,7 +178,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({ onSuccess }) => {
           <legend className="mb-2 block text-sm font-medium text-gray-700">交通手段</legend>
           <div className="flex gap-4">
             <label className="flex cursor-pointer items-center gap-2">
-              <Input
+              <input
                 type="radio"
                 name="transportation"
                 value="TRAIN"
@@ -136,7 +194,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({ onSuccess }) => {
               <span className="text-sm text-gray-700">電車</span>
             </label>
             <label className="flex cursor-pointer items-center gap-2">
-              <Input
+              <input
                 type="radio"
                 name="transportation"
                 value="BUS"
@@ -159,7 +217,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({ onSuccess }) => {
           <legend className="mb-2 block text-sm font-medium text-gray-700">片道/往復</legend>
           <div className="flex gap-4">
             <label className="flex cursor-pointer items-center gap-2">
-              <Input
+              <input
                 type="radio"
                 name="tripType"
                 value="ONEWAY"
@@ -175,7 +233,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({ onSuccess }) => {
               <span className="text-sm text-gray-700">片道</span>
             </label>
             <label className="flex cursor-pointer items-center gap-2">
-              <Input
+              <input
                 type="radio"
                 name="tripType"
                 value="ROUNDTRIP"
@@ -207,6 +265,27 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({ onSuccess }) => {
           {isSubmitting ? "送信中..." : "申請する"}
         </button>
       </form>
+
+      {/* この経路をお気に入りに保存 */}
+      <button
+        type="button"
+        disabled={
+          isFavoriteSaving || !expenseForm.departure || !expenseForm.arrival || !expenseForm.amount
+        }
+        onClick={async () => {
+          await saveFromExpenseForm({
+            departure: expenseForm.departure,
+            arrival: expenseForm.arrival,
+            amount: expenseForm.amount,
+            transport: expenseForm.transport,
+            tripType: expenseForm.tripType,
+          });
+          showToast("お気に入りに保存しました");
+        }}
+        className="mt-3 w-full rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors disabled:cursor-not-allowed disabled:opacity-50 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      >
+        {isFavoriteSaving ? "保存中..." : "★ この経路をお気に入りに保存"}
+      </button>
     </>
   );
 };
