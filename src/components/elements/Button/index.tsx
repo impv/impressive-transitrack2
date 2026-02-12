@@ -19,17 +19,17 @@ const variantClasses: Record<ButtonVariant, string> = {
   danger:
     "border border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 focus:ring-red-400",
   ghost:
-    "border border-blue-200 bg-white text-blue-600 hover:border-blue-300 hover:bg-blue-50 focus:ring-blue-400 disabled:opacity-50",
+    "border border-blue-200 text-blue-600 hover:border-blue-300 hover:bg-blue-50 focus:ring-blue-400 disabled:opacity-50",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "px-2 py-1 text-xs",
+  sm: "px-1 py-1 text-sm",
   md: "px-3 py-1.5 text-sm",
   lg: "px-4 py-3 text-sm",
 };
 
 const ButtonStyles = tv({
-  base: "inline-flex items-center justify-center rounded-lg font-medium transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed",
+  base: "inline-flex items-center justify-center rounded-lg font-medium transition-colors cursor-pointer focus:outline-none disabled:cursor-not-allowed",
   variants: {
     variant: {
       primary: variantClasses.primary,
