@@ -5,8 +5,8 @@ import {
   createFavoriteRoute,
   updateFavoriteRoute,
   deleteFavoriteRoute,
-} from "@/features/favoriteRoutes/apiClient";
-import type { FavoriteRouteResponseItem } from "@/features/favoriteRoutes/apiClient";
+} from "@/features/expenses/favoriteRoutesApiClient";
+import type { FavoriteRouteResponseItem } from "@/features/expenses/favoriteRoutesApiClient";
 import type { FavoriteRouteInput } from "@/types/favoriteRoutes";
 
 const INITIAL_FORM_STATE: FavoriteRouteInput = {

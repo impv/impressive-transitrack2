@@ -1,4 +1,5 @@
 import { useSession, signIn } from "next-auth/react";
+import { Button } from "@/components/elements/Button";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
@@ -32,14 +33,16 @@ export const Login = () => {
 
         {/* ログインボタン */}
         <div className="mt-8">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
             onClick={() =>
               signIn("google", {
                 callbackUrl: "/dashboard",
               })
             }
-            className="group relative flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none"
+            className="group relative gap-3"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <title>Google logo</title>
@@ -61,7 +64,7 @@ export const Login = () => {
               />
             </svg>
             <span>Googleでログイン</span>
-          </button>
+          </Button>
         </div>
 
         {/* フッター */}
