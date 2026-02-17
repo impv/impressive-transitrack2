@@ -27,6 +27,12 @@
       "recommended": true,
       "a11y": {
         "noAriaUnsupportedElements": "warn",
+        "noLabelWithoutControl": {
+          "level": "error",
+          "options": {
+            "inputComponents": ["Input"]
+          }
+        },
         "useAltText": "warn",
         "useAriaPropsForRole": "warn",
         "useAriaPropsSupportedByRole": "warn",

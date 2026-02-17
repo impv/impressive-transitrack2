@@ -1,5 +1,5 @@
 import type { FavoriteRouteInput } from "@/types/favoriteRoutes";
-import { TransportType, TripType } from "@prisma/client";
+import type { TransportType, TripType } from "@prisma/client";
 
 interface ApiError {
   message: string;

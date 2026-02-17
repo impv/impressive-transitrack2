@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import { Button } from "@/components/elements/Button";
 
 export const LoginError = () => {
   const router = useRouter();
@@ -22,13 +23,15 @@ export const LoginError = () => {
 
         {/* 戻るボタン */}
         <div className="mt-8">
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
             onClick={() => router.push("/auth/login")}
-            className="cursor-pointer w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 shadow-sm hover:shadow-md"
           >
             前のページへ戻る
-          </button>
+          </Button>
         </div>
       </div>
     </div>
