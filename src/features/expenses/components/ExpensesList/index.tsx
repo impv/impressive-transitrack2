@@ -9,6 +9,8 @@ import { getCurrentYearMonth } from "@/features/expenses/utils/getCurrentYearMon
 import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpenseRecords";
 import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
+import { AiOutlineEdit } from "react-icons/ai";
+import { AiOutlineDelete } from "react-icons/ai";
 
 // 交通費申請一覧カードコンポーネント
 interface ExpenseListProps {
@@ -117,13 +119,10 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
             const titleId = `expense-${idx}-title`;
 
             return (
-              <li
-                key={expense.id}
-                className="transition-transform duration-200 hover:-translate-y-0.5"
-              >
+              <li key={expense.id}>
                 <article
                   aria-labelledby={titleId}
-                  className="rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500"
+                  className="rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm focus:outline-none"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
@@ -169,21 +168,17 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                       </div>
                     </dl>
                     <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditClick(expense.id)}
-                        className="rounded-md px-3 py-1.5 text-xs"
-                      >
-                        編集する
+                      <Button variant="ghost" size="sm" className="rounded-md text-lg">
+                        <AiOutlineEdit
+                          className="text-blue-500"
+                          onClick={() => handleEditClick(expense.id)}
+                        />
                       </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDeleteClick(expense.id)}
-                        className="rounded-md px-3 py-1.5 text-xs"
-                      >
-                        削除する
+                      <Button variant="danger" size="sm" className="rounded-md text-lg">
+                        <AiOutlineDelete
+                          className="text-red-500"
+                          onClick={() => handleDeleteClick(expense.id)}
+                        />
                       </Button>
                     </div>
                   </div>

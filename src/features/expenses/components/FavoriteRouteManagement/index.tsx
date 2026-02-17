@@ -3,6 +3,8 @@ import type { FavoriteRouteResponseItem } from "@/features/expenses/favoriteRout
 import type { FavoriteRouteInput } from "@/types/favoriteRoutes";
 import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
+import { AiOutlineEdit } from "react-icons/ai";
+import { AiOutlineDelete } from "react-icons/ai";
 
 interface FavoriteRouteManagementProps {
   /**
@@ -247,21 +249,17 @@ export const FavoriteRouteManagement = ({
                 </p>
               </div>
               <div className="ml-3 flex shrink-0 gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEditFavorite(fav.id)}
-                  className="rounded-md"
-                >
-                  編集
+                <Button variant="ghost" size="sm" className="rounded-md text-lg">
+                  <AiOutlineEdit
+                    className="text-blue-500"
+                    onClick={() => handleEditFavorite(fav.id)}
+                  />
                 </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDeleteFavorite(fav.id)}
-                  className="rounded-md"
-                >
-                  削除
+                <Button variant="danger" size="sm" className="rounded-md text-lg">
+                  <AiOutlineDelete
+                    className="text-red-500"
+                    onClick={() => handleDeleteFavorite(fav.id)}
+                  />
                 </Button>
               </div>
             </li>
