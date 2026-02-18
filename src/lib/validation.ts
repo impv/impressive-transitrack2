@@ -1,6 +1,6 @@
 import { TransportType, TripType } from "@prisma/client";
 
-export interface ValidationResult {
+interface ValidationResult {
   /**
    * 入力された値がエラーかどうか
    */
