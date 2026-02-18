@@ -1,12 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
+import {
+  validate,
+  validateAmount,
+  validateRequired,
+  validateTransportType,
+  validateTripType,
+} from "@/lib/validation";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {
   deleteFavoriteRouteById,
   getFavoriteRouteById,
   updateFavoriteRouteById,
 } from "@/server/favoriteRoutes/repository";
-import { TransportType, TripType } from "@prisma/client";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -32,24 +38,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === "PUT") {
       const { name, departure, arrival, amount, transport, tripType } = req.body;
 
-      if (!departure || !arrival || !amount || !transport || !tripType) {
-        return res.status(400).json({ message: "必須項目が不足しています" });
-      }
-
-      if (!Object.values(TransportType).includes(transport)) {
-        return res.status(400).json({ message: "transport の値が不正です" });
-      }
-
-      if (!Object.values(TripType).includes(tripType)) {
-        return res.status(400).json({ message: "tripType の値が不正です" });
+      const validation = validate(
+        validateRequired({ departure, arrival, amount, transport, tripType }),
+        validateTransportType(transport),
+        validateTripType(tripType),
+        validateAmount(amount),
+      );
+      if (validation.hasError) {
+        return res.status(400).json({ message: validation.message });
       }
 
       const numAmount = Number(amount);
-      if (Number.isNaN(numAmount) || numAmount <= 0 || !Number.isInteger(numAmount)) {
-        return res
-          .status(400)
-          .json({ message: "金額は整数（円単位）の正の数である必要があります" });
-      }
 
       const updated = await updateFavoriteRouteById(favoriteId, {
         name: typeof name === "string" ? name.trim() : "",

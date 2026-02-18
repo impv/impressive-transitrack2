@@ -1,6 +1,13 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createExpense } from "@/features/expenses/apiClient";
+import {
+  runValidations,
+  validateAmount,
+  validateDate,
+  validateNotFutureDate,
+  validateRequired,
+} from "@/lib/validation";
 import type { ExpenseInput } from "@/types/expenses";
 
 const INITIAL_FORM_STATE: ExpenseInput = {
@@ -42,39 +49,19 @@ export const useExpenseForm = (): UseExpenseFormResult => {
       setSubmitError(null);
       setSubmitSuccess(false);
 
-      if (
-        !expenseForm.date ||
-        !expenseForm.departure ||
-        !expenseForm.arrival ||
-        !expenseForm.amount
-      ) {
-        setSubmitError("全ての項目を入力してください");
-        return;
-      }
-
-      const numAmount = Number(expenseForm.amount);
-      if (!Number.isFinite(numAmount) || numAmount <= 0) {
-        setSubmitError("金額は正の数値である必要があります");
-        return;
-      }
-
-      if (!Number.isInteger(numAmount)) {
-        setSubmitError("金額は整数（円単位）で入力してください");
-        return;
-      }
-
-      const selectedDate = new Date(expenseForm.date);
-      if (Number.isNaN(selectedDate.getTime())) {
-        setSubmitError("有効な日付を入力してください");
-        return;
-      }
-
-      const today = new Date();
-      selectedDate.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
-
-      if (selectedDate > today) {
-        setSubmitError("未来の日付は選択できません");
+      const validation = runValidations(
+        validateRequired({
+          date: expenseForm.date,
+          departure: expenseForm.departure,
+          arrival: expenseForm.arrival,
+          amount: expenseForm.amount,
+        }),
+        validateAmount(expenseForm.amount),
+        validateDate(expenseForm.date),
+        validateNotFutureDate(expenseForm.date),
+      );
+      if (validation.hasError) {
+        setSubmitError(validation.message ?? "入力内容に誤りがあります");
         return;
       }
 

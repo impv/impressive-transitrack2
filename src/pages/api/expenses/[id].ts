@@ -1,8 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
+import {
+  validate,
+  validateAmount,
+  validateDate,
+  validateNotFutureDateWithOffset,
+  validateRequired,
+  validateTransportType,
+} from "@/lib/validation";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { deleteExpenseById, getExpenseById, updateExpenseById } from "@/server/expenses/repository";
-import { TransportType } from "@prisma/client";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -44,9 +51,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === "PUT") {
       const { date, departure, arrival, amount, transport, timezoneOffset } = req.body;
 
-      // 基本的なバリデーション
-      if (!date || !departure || !arrival || !amount || !transport) {
-        return res.status(400).json({ message: "必須項目が不足しています" });
+      const validation = validate(
+        validateRequired({ date, departure, arrival, amount, transport }),
+        validateTransportType(transport),
+        validateAmount(amount),
+        validateDate(date),
+        validateNotFutureDateWithOffset(date, timezoneOffset),
+      );
+      if (validation.hasError) {
+        return res.status(400).json({ message: validation.message });
       }
 
       const expense = await getExpenseById(expenseId);
@@ -54,35 +67,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (expense.memberId !== session.user.id)
         return res.status(403).json({ message: "権限なし" });
 
-      const validTransports = Object.values(TransportType) as string[];
-      if (!validTransports.includes(transport))
-        return res.status(400).json({ message: "transport の値が不正です" });
-
       const numAmount = Number(amount);
-      if (Number.isNaN(numAmount) || numAmount <= 0 || !Number.isInteger(numAmount)) {
-        return res
-          .status(400)
-          .json({ message: "金額は整数（円単位）の正の数である必要があります" });
-      }
-
       const selectedDate = new Date(date);
-      if (Number.isNaN(selectedDate.getTime())) {
-        return res.status(400).json({ message: "有効な日付を入力してください" });
-      }
-
-      if (typeof timezoneOffset === "number") {
-        const now = new Date();
-        const userLocalTime = new Date(now.getTime() - timezoneOffset * 60 * 1000);
-        const todayInUserTZ = userLocalTime.toISOString().split("T")[0];
-        if (date > todayInUserTZ) {
-          return res.status(400).json({ message: "未来の日付は選択できません" });
-        }
-      } else {
-        const todayUtc = new Date().toISOString().split("T")[0];
-        if (date > todayUtc) {
-          return res.status(400).json({ message: "未来の日付は選択できません" });
-        }
-      }
 
       const updated = await updateExpenseById(expenseId, {
         // Date を string 型に変換して保存するため ISO 文字列に変換
