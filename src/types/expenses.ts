@@ -10,11 +10,11 @@ export interface Expense {
    */
   date: string;
   /**
-   * 内容
+   * 出発地
    */
   departure: string;
   /**
-   * 金額
+   * 到着地
    */
   arrival: string;
   /**
