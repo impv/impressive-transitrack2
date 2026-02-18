@@ -99,37 +99,43 @@ pnpm knip
 
 ```txt
 src/
- ├── components/           # 共通UIコンポーネント
- │   ├── elements/         # Button / Card など最小単位
- │
- ├── features/             # 機能単位のモジュール
- │   ├── expenses/         # 交通費申請機能
- |   │   ├── components/                # expenses機能専用コンポーネント
- │   │       ├── ExpenseForm/           # 交通費申請フォーム
- │   │       ├── ExpensesList/          # 交通費申請一覧
- │   │       ├── FavoriteRouteManagement/ # お気に入り経路管理
- │   │       └── SummaryExpenses/       # 申請内容サマリー
- |   │   ├── hooks/                # expenses機能専用hooks
- |   │   └── utils/                # expenses機能専用hooks
- │
- ├── pages/                # ルーティング（Pages Router）
- │   ├── api/              # API Routes（サーバー側処理）
- |   │   ├── auth/         # Google認証の設定
- |   │   ├── expenses/     # 交通費のサーバー側処理
- |   │   └── favorite-routes/     # お気に入り経路のサーバー側処理
- │   ├── auth/             # 認証関連ページ
- │   └── dashboard         # トップページ
- │
- ├── lib/                  # API / DB / ユーティリティ
- │   ├── prisma.ts         # Prismaクライアント（シングルトン）
- │   └── db/member.ts      # メンバーupsert処理
- │
- ├── server/               # サーバー側ビジネスロジック（リポジトリ層）
- │   ├── expenses/repository.ts       # 交通費のDB操作
- │   └── favoriteRoutes/repository.ts # お気に入り経路のDB操作
- │
- ├── styles/               # グローバルCSS
- └── types/                # 共通型定義
+├── components/              # 共通UIコンポーネント
+│   └── elements/            # Button / Card / Header / Input / Toast など最小単位
+│
+├── features/                # 機能単位のモジュール
+│   └── expenses/            # 交通費・お気に入り経路機能
+│       ├── apiClient.ts                     # 交通費 API 呼び出し
+│       ├── favoriteRoutesApiClient.ts       # お気に入り経路 API 呼び出し
+│       ├── components/                      # 機能専用コンポーネント
+│       │   ├── ExpenseForm/                 # 交通費申請フォーム
+│       │   ├── ExpensesList/                # 交通費申請一覧
+│       │   ├── FavoriteRouteManagement/     # お気に入り経路管理
+│       │   └── SummaryExpenses/             # 申請内容サマリー
+│       ├── hooks/                           # 機能専用カスタムフック
+│       └── utils/                           # 機能専用ユーティリティ関数
+│
+├── hooks/                   # グローバルなカスタムフック
+│
+├── lib/                     # 共通ライブラリ
+│   ├── prisma.ts            # Prismaクライアント（シングルトン）
+│   ├── validation.ts        # バリデーション関数
+│   └── db/
+│       └── member.ts        # メンバーupsert処理
+│
+├── pages/                   # ルーティング（Pages Router）
+│   ├── api/                 # API Routes（サーバー側処理）
+│   │   ├── auth/            # Google認証の設定
+│   │   ├── expenses/        # 交通費のサーバー側処理
+│   │   └── favorite-routes/ # お気に入り経路のサーバー側処理
+│   ├── auth/                # 認証関連ページ
+│   └── dashboard/           # トップページ
+│
+├── server/                  # サーバー側ビジネスロジック（リポジトリ層）
+│   ├── expenses/repository.ts       # 交通費のDB操作
+│   └── favoriteRoutes/repository.ts # お気に入り経路のDB操作
+│
+├── styles/                  # グローバルCSS
+└── types/                   # 共通型定義
 ```
 
 ## サーバー側の処理フロー
@@ -159,7 +165,7 @@ Next.js の Pages Router における API Routes がサーバー側の処理を�
 | ファイル | 提供する関数 | 対応する API |
 |----------|-------------|-------------|
 | `src/features/expenses/apiClient.ts` | `createExpense()`, `getExpenses()`, `updateExpense()`, `deleteExpense()` | `/api/expenses` |
-| `src/features/favoriteRoutes/apiClient.ts` | `getFavoriteRoutes()`, `createFavoriteRoute()`, `updateFavoriteRoute()`, `deleteFavoriteRoute()` | `/api/favorite-routes` |
+| `src/features/expenses/favoriteRoutesApiClient.ts` | `getFavoriteRoutes()`, `createFavoriteRoute()`, `updateFavoriteRoute()`, `deleteFavoriteRoute()` | `/api/favorite-routes` |
 
 ---
 
