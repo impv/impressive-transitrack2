@@ -1,11 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
+import {
+  validate,
+  validateAmount,
+  validateRequired,
+  validateTransportType,
+  validateTripType,
+} from "@/lib/validation";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import {
   createFavoriteRoute,
   getFavoriteRoutesByMemberId,
 } from "@/server/favoriteRoutes/repository";
-import { TransportType, TripType } from "@prisma/client";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions);
@@ -27,26 +33,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const { name, departure, arrival, amount, transport, tripType } = req.body;
 
-      if (!departure || !arrival || !amount || !transport || !tripType) {
-        return res.status(400).json({ message: "必須項目が不足しています" });
-      }
-
-      if (!Object.values(TransportType).includes(transport)) {
-        return res.status(400).json({ message: "transport の値が不正です" });
-      }
-
-      if (!Object.values(TripType).includes(tripType)) {
-        return res.status(400).json({ message: "tripType の値が不正です" });
+      const errors = validate(
+        validateRequired({ departure, arrival, amount, transport, tripType }),
+        validateTransportType(transport),
+        validateTripType(tripType),
+        validateAmount(amount),
+      );
+      if (errors.length > 0) {
+        return res.status(400).json({ message: errors.join("、") });
       }
 
       const numAmount = Number(amount);
-      if (Number.isNaN(numAmount) || numAmount <= 0) {
-        return res.status(400).json({ message: "金額は正の数値である必要があります" });
-      }
-
-      if (!Number.isInteger(numAmount)) {
-        return res.status(400).json({ message: "金額は整数（円単位）で入力してください" });
-      }
 
       const favorite = await createFavoriteRoute({
         memberId: session.user.id,

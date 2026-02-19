@@ -38,7 +38,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
   const {
     expenseForm,
     isSubmitting,
-    submitError,
+    submitErrors,
     submitSuccess,
     setExpenseForm,
     handleSubmitExpense,
@@ -58,8 +58,14 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
       </h2>
 
       {/* エラーメッセージ */}
-      {submitError && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{submitError}</div>
+      {submitErrors.length > 0 && (
+        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">
+          <ul className="list-disc pl-4 space-y-1">
+            {submitErrors.map((msg) => (
+              <li key={msg}>{msg}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* 成功メッセージ */}
@@ -106,7 +112,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmitExpense} className="space-y-4">
+      <form onSubmit={handleSubmitExpense} noValidate className="space-y-4">
         {/* 日付 */}
         <div>
           <label htmlFor="date" className="mb-1 block text-sm font-medium text-gray-700">

@@ -1,6 +1,13 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createExpense } from "@/features/expenses/apiClient";
+import {
+  validate,
+  validateAmount,
+  validateDate,
+  validateNotFutureDate,
+  validateRequired,
+} from "@/lib/validation";
 import type { ExpenseInput } from "@/types/expenses";
 
 const INITIAL_FORM_STATE: ExpenseInput = {
@@ -17,14 +24,14 @@ interface UseExpenseFormResult {
   setExpenseForm: Dispatch<SetStateAction<ExpenseInput>>;
   handleSubmitExpense: (event: FormEvent) => Promise<void>;
   isSubmitting: boolean;
-  submitError: string | null;
+  submitErrors: string[];
   submitSuccess: boolean;
 }
 
 export const useExpenseForm = (): UseExpenseFormResult => {
   const [expenseForm, setExpenseForm] = useState<ExpenseInput>(INITIAL_FORM_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitErrors, setSubmitErrors] = useState<string[]>([]);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -39,42 +46,22 @@ export const useExpenseForm = (): UseExpenseFormResult => {
   const handleSubmitExpense = useCallback(
     async (event: FormEvent) => {
       event.preventDefault();
-      setSubmitError(null);
+      setSubmitErrors([]);
       setSubmitSuccess(false);
 
-      if (
-        !expenseForm.date ||
-        !expenseForm.departure ||
-        !expenseForm.arrival ||
-        !expenseForm.amount
-      ) {
-        setSubmitError("全ての項目を入力してください");
-        return;
-      }
-
-      const numAmount = Number(expenseForm.amount);
-      if (!Number.isFinite(numAmount) || numAmount <= 0) {
-        setSubmitError("金額は正の数値である必要があります");
-        return;
-      }
-
-      if (!Number.isInteger(numAmount)) {
-        setSubmitError("金額は整数（円単位）で入力してください");
-        return;
-      }
-
-      const selectedDate = new Date(expenseForm.date);
-      if (Number.isNaN(selectedDate.getTime())) {
-        setSubmitError("有効な日付を入力してください");
-        return;
-      }
-
-      const today = new Date();
-      selectedDate.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
-
-      if (selectedDate > today) {
-        setSubmitError("未来の日付は選択できません");
+      const errors = validate(
+        validateRequired({
+          date: expenseForm.date,
+          departure: expenseForm.departure,
+          arrival: expenseForm.arrival,
+          amount: expenseForm.amount,
+        }),
+        validateAmount(expenseForm.amount),
+        validateDate(expenseForm.date),
+        validateNotFutureDate(expenseForm.date),
+      );
+      if (errors.length > 0) {
+        setSubmitErrors(errors);
         return;
       }
 
@@ -91,7 +78,7 @@ export const useExpenseForm = (): UseExpenseFormResult => {
         successTimeoutRef.current = setTimeout(() => setSubmitSuccess(false), 3000);
       } catch (error) {
         console.error("交通費申請の送信に失敗しました", error);
-        setSubmitError(error instanceof Error ? error.message : "交通費申請の送信に失敗しました");
+        setSubmitErrors([error instanceof Error ? error.message : "交通費申請の送信に失敗しました"]);
       } finally {
         setIsSubmitting(false);
       }
@@ -104,7 +91,7 @@ export const useExpenseForm = (): UseExpenseFormResult => {
     setExpenseForm,
     handleSubmitExpense,
     isSubmitting,
-    submitError,
+    submitErrors,
     submitSuccess,
   };
 };

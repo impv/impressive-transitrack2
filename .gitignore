@@ -36,6 +36,9 @@ lerna-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# GitHub Copilot
+.github/copilot-instructions.md
+
 # IDEs
 .vscode/*
 *.bak

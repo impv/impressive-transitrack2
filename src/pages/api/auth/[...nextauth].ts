@@ -3,6 +3,10 @@ import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { z } from "zod";
 
+/**
+ * NextAuthを使ったGoogleログイン認証の設定
+ */
+
 const companyDomain = process.env.COMPANY_DOMAIN;
 
 const GoogleProfileSchema = z.object({

@@ -38,16 +38,6 @@ model Expense {
   @@index([memberId, date])
 }
 
-enum TransportType {
-  TRAIN
-  BUS
-}
-
-enum TripType {
-  ONEWAY
-  ROUNDTRIP
-}
-
 model FavoriteRoute {
   id        String        @id @default(uuid())
   member    Member        @relation(fields: [memberId], references: [id])
@@ -62,4 +52,14 @@ model FavoriteRoute {
   updatedAt DateTime      @updatedAt
 
   @@index([memberId])
+}
+
+enum TransportType {
+  TRAIN
+  BUS
+}
+
+enum TripType {
+  ONEWAY
+  ROUNDTRIP
 }
