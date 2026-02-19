@@ -1,5 +1,12 @@
 import { useState } from "react";
 import { deleteExpense, updateExpense } from "@/features/expenses/apiClient";
+import {
+  validate,
+  validateAmount,
+  validateDate,
+  validateNotFutureDate,
+  validateRequired,
+} from "@/lib/validation";
 import type { ExpenseInput, ExpenseRecord } from "@/types/expenses";
 
 type ExpenseEditFormState = Omit<ExpenseInput, "tripType">;
@@ -19,7 +26,7 @@ export const useExpenseEdit = (opts: UseExpenseEditorOptions) => {
     transport: "TRAIN",
   });
   const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
 
   const openEditor = (expense: ExpenseRecord) => {
@@ -71,8 +78,25 @@ export const useExpenseEdit = (opts: UseExpenseEditorOptions) => {
   };
 
   const submitUpdate = async (expenseId: string) => {
+    setErrors([]);
+
+    const validationErrors = validate(
+      validateRequired({
+        date: expenseEditForm.date,
+        departure: expenseEditForm.departure,
+        arrival: expenseEditForm.arrival,
+        amount: expenseEditForm.amount,
+      }),
+      validateAmount(expenseEditForm.amount),
+      validateDate(expenseEditForm.date),
+      validateNotFutureDate(expenseEditForm.date),
+    );
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     setIsUpdating(true);
-    setError(null);
     try {
       const payload: Partial<ExpenseInput> & { timezoneOffset: number } = {
         date: expenseEditForm.date,
@@ -92,7 +116,7 @@ export const useExpenseEdit = (opts: UseExpenseEditorOptions) => {
       return updatedExpense;
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "更新に失敗しました";
-      setError(errorMessage);
+      setErrors([errorMessage]);
       throw e;
     } finally {
       setIsUpdating(false);
@@ -102,7 +126,7 @@ export const useExpenseEdit = (opts: UseExpenseEditorOptions) => {
   return {
     expenseEditForm,
     isUpdating,
-    error,
+    errors,
     selectedExpenseId,
     setExpenseEditForm,
     openEditor,
