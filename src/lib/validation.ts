@@ -110,13 +110,10 @@ export const validateRequired = (fields: Record<string, unknown>): ValidationRes
 };
 
 /**
- * 複数のバリデーションを順番に実行し、最初のエラーで停止
+ * 複数のバリデーションを全て実行し、全エラーメッセージを収集する
  */
-export const validate = (...validations: ValidationResult[]): ValidationResult => {
-  for (const result of validations) {
-    if (result.hasError) {
-      return result;
-    }
-  }
-  return valid;
+export const validate = (...validations: ValidationResult[]): string[] => {
+  return validations
+    .filter((result) => result.hasError && result.message)
+    .map((result) => result.message as string);
 };

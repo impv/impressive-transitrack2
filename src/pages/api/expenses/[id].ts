@@ -51,15 +51,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === "PUT") {
       const { date, departure, arrival, amount, transport, timezoneOffset } = req.body;
 
-      const validation = validate(
+      const errors = validate(
         validateRequired({ date, departure, arrival, amount, transport }),
         validateTransportType(transport),
         validateAmount(amount),
         validateDate(date),
         validateNotFutureDateWithOffset(date, timezoneOffset),
       );
-      if (validation.hasError) {
-        return res.status(400).json({ message: validation.message });
+      if (errors.length > 0) {
+        return res.status(400).json({ message: errors.join("、") });
       }
 
       const expense = await getExpenseById(expenseId);
