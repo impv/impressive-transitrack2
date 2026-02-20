@@ -54,6 +54,7 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
     expenseEditForm,
     selectedExpenseId,
     isUpdating: isEditUpdating,
+    errors: editErrors,
     setExpenseEditForm,
     submitUpdate,
     setSelectedExpenseId,
@@ -210,11 +211,20 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                             await submitUpdate(expense.id);
                           } catch (err) {
                             console.error("更新に失敗しました:", err);
-                            alert("更新に失敗しました。入力内容を確認してください。");
                           }
                         }}
+                        noValidate
                         className="mt-3 space-y-3"
                       >
+                        {editErrors.length > 0 && (
+                          <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              {editErrors.map((msg) => (
+                                <li key={msg}>{msg}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                         <div className="grid grid-cols-1 gap-3">
                           <div>
                             <label

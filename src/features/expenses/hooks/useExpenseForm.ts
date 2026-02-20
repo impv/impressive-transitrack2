@@ -2,7 +2,7 @@ import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createExpense } from "@/features/expenses/apiClient";
 import {
-  runValidations,
+  validate,
   validateAmount,
   validateDate,
   validateNotFutureDate,
@@ -24,14 +24,14 @@ interface UseExpenseFormResult {
   setExpenseForm: Dispatch<SetStateAction<ExpenseInput>>;
   handleSubmitExpense: (event: FormEvent) => Promise<void>;
   isSubmitting: boolean;
-  submitError: string | null;
+  submitErrors: string[];
   submitSuccess: boolean;
 }
 
 export const useExpenseForm = (): UseExpenseFormResult => {
   const [expenseForm, setExpenseForm] = useState<ExpenseInput>(INITIAL_FORM_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitErrors, setSubmitErrors] = useState<string[]>([]);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -46,10 +46,10 @@ export const useExpenseForm = (): UseExpenseFormResult => {
   const handleSubmitExpense = useCallback(
     async (event: FormEvent) => {
       event.preventDefault();
-      setSubmitError(null);
+      setSubmitErrors([]);
       setSubmitSuccess(false);
 
-      const validation = runValidations(
+      const errors = validate(
         validateRequired({
           date: expenseForm.date,
           departure: expenseForm.departure,
@@ -60,8 +60,8 @@ export const useExpenseForm = (): UseExpenseFormResult => {
         validateDate(expenseForm.date),
         validateNotFutureDate(expenseForm.date),
       );
-      if (validation.hasError) {
-        setSubmitError(validation.message ?? "入力内容に誤りがあります");
+      if (errors.length > 0) {
+        setSubmitErrors(errors);
         return;
       }
 
@@ -78,7 +78,7 @@ export const useExpenseForm = (): UseExpenseFormResult => {
         successTimeoutRef.current = setTimeout(() => setSubmitSuccess(false), 3000);
       } catch (error) {
         console.error("交通費申請の送信に失敗しました", error);
-        setSubmitError(error instanceof Error ? error.message : "交通費申請の送信に失敗しました");
+        setSubmitErrors([error instanceof Error ? error.message : "交通費申請の送信に失敗しました"]);
       } finally {
         setIsSubmitting(false);
       }
@@ -91,7 +91,7 @@ export const useExpenseForm = (): UseExpenseFormResult => {
     setExpenseForm,
     handleSubmitExpense,
     isSubmitting,
-    submitError,
+    submitErrors,
     submitSuccess,
   };
 };

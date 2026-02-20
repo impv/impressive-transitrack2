@@ -38,14 +38,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === "PUT") {
       const { name, departure, arrival, amount, transport, tripType } = req.body;
 
-      const validation = validate(
+      const errors = validate(
         validateRequired({ departure, arrival, amount, transport, tripType }),
         validateTransportType(transport),
         validateTripType(tripType),
         validateAmount(amount),
       );
-      if (validation.hasError) {
-        return res.status(400).json({ message: validation.message });
+      if (errors.length > 0) {
+        return res.status(400).json({ message: errors.join("、") });
       }
 
       const numAmount = Number(amount);
