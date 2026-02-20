@@ -240,7 +240,7 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                               onChange={(e) =>
                                 setExpenseEditForm({ ...expenseEditForm, date: e.target.value })
                               }
-                              className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
+                              className="w-full max-w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
                               required
                             />
                           </div>
