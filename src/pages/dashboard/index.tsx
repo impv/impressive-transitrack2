@@ -11,6 +11,7 @@ import { Card } from "@/components/elements/Card";
 import { useEffect, useState } from "react";
 import { FavoriteRouteManagement } from "@/features/expenses/components/FavoriteRouteManagement";
 import { useFavoriteRoutes } from "@/features/expenses/hooks/useFavoriteRoutes";
+import { ScrollToTopButton } from "@/components/elements/ScrollToTopButton";
 
 const Dashboard = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -111,6 +112,9 @@ const Dashboard = () => {
 
         {/* トースト */}
         {toastMessage && <Toast toastMessage={toastMessage} />}
+
+        {/* ページ上部へ戻るボタン */}
+        <ScrollToTopButton />
       </div>
     </div>
   );

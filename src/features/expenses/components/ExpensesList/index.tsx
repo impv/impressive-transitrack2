@@ -9,8 +9,8 @@ import { getCurrentYearMonth } from "@/features/expenses/utils/getCurrentYearMon
 import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpenseRecords";
 import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
-import { AiOutlineEdit } from "react-icons/ai";
-import { AiOutlineDelete } from "react-icons/ai";
+import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
+import { MdExpandMore, MdExpandLess } from "react-icons/md";
 
 // 交通費申請一覧カードコンポーネント
 interface ExpenseListProps {
@@ -26,6 +26,12 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
 
   const [listYearMonth, setListYearMonth] = useState<string>(getCurrentYearMonth());
   const [listExpenses, setListExpenses] = useState<ExpenseRecord[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // リストの初期表示件数
+  const INITIAL_DISPLAY_COUNT = 4;
+  const visibleExpenses = isExpanded ? listExpenses : listExpenses.slice(0, INITIAL_DISPLAY_COUNT);
+  const hasMore = listExpenses.length > INITIAL_DISPLAY_COUNT;
 
   // 交通費一覧用のデータ取得
   // biome-ignore lint/correctness/useExhaustiveDependencies: 申請が成功した時のリフレッシュトリガーを追加
@@ -101,7 +107,7 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
         <p className="text-sm text-gray-600">選択した期間に交通費申請がありません。</p>
       ) : (
         <ul className="space-y-3">
-          {listExpenses.map((expense, idx) => {
+          {visibleExpenses.map((expense, idx) => {
             const dateObject = new Date(expense.date);
             const formattedDate = Number.isNaN(dateObject.getTime())
               ? "日付不明"
@@ -147,41 +153,53 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700">
-                      <div className="flex items-baseline gap-2">
-                        <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                          出発
-                        </dt>
-                        <dd className="text-gray-900">{expense.departure}</dd>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                          到着
-                        </dt>
-                        <dd className="text-gray-900">{expense.arrival}</dd>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                          申請金額
-                        </dt>
-                        <dd className="text-gray-900">{amountLabel}円</dd>
-                      </div>
-                    </dl>
-                    <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
-                      <Button variant="ghost" size="sm" className="rounded-md text-lg">
-                        <AiOutlineEdit
-                          className="text-blue-500"
-                          onClick={() => handleEditClick(expense.id)}
-                        />
-                      </Button>
-                      <Button variant="danger" size="sm" className="rounded-md text-lg">
-                        <AiOutlineDelete
-                          className="text-red-500"
-                          onClick={() => handleDeleteClick(expense.id)}
-                        />
-                      </Button>
+                  <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700">
+                    <div className="flex items-baseline gap-2">
+                      <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        出発
+                      </dt>
+                      <dd className="text-gray-900">{expense.departure}</dd>
                     </div>
+                    <div className="flex items-baseline gap-2">
+                      <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        到着
+                      </dt>
+                      <dd className="text-gray-900">{expense.arrival}</dd>
+                    </div>
+                    <div className="flex w-full items-center gap-2 md:w-auto md:items-baseline">
+                      <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        申請金額
+                      </dt>
+                      <dd className="text-gray-900">{amountLabel}円</dd>
+                      <div className="ml-auto flex items-center gap-2 md:hidden">
+                        <Button variant="ghost" size="sm" className="rounded-md text-xl">
+                          <AiOutlineEdit
+                            className="text-blue-500"
+                            onClick={() => handleEditClick(expense.id)}
+                          />
+                        </Button>
+                        <Button variant="danger" size="sm" className="rounded-md text-xl">
+                          <AiOutlineDelete
+                            className="text-red-500"
+                            onClick={() => handleDeleteClick(expense.id)}
+                          />
+                        </Button>
+                      </div>
+                    </div>
+                  </dl>
+                  <div className="mt-4 hidden items-center justify-end gap-2 md:flex">
+                    <Button variant="ghost" size="sm" className="rounded-md text-lg">
+                      <AiOutlineEdit
+                        className="text-blue-500"
+                        onClick={() => handleEditClick(expense.id)}
+                      />
+                    </Button>
+                    <Button variant="danger" size="sm" className="rounded-md text-lg">
+                      <AiOutlineDelete
+                        className="text-red-500"
+                        onClick={() => handleDeleteClick(expense.id)}
+                      />
+                    </Button>
                   </div>
                   {/* 編集用アコーディオン */}
                   {selectedExpenseId === expense.id && (
@@ -222,7 +240,7 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                               onChange={(e) =>
                                 setExpenseEditForm({ ...expenseEditForm, date: e.target.value })
                               }
-                              className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
+                              className="w-full max-w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
                               required
                             />
                           </div>
@@ -351,6 +369,24 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
             );
           })}
         </ul>
+      )}
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded((v) => !v)}
+          className="mt-3 flex w-full items-center justify-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+        >
+          {isExpanded ? (
+            <>
+              <MdExpandLess size={20} />
+              閉じる
+            </>
+          ) : (
+            <>
+              <MdExpandMore size={20} />他 {listExpenses.length - INITIAL_DISPLAY_COUNT} 件を表示
+            </>
+          )}
+        </button>
       )}
     </>
   );

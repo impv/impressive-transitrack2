@@ -249,13 +249,13 @@ export const FavoriteRouteManagement = ({
                 </p>
               </div>
               <div className="ml-3 flex shrink-0 gap-2">
-                <Button variant="ghost" size="sm" className="rounded-md text-lg">
+                <Button variant="ghost" size="sm" className="rounded-md  md:text-lg text-xl">
                   <AiOutlineEdit
                     className="text-blue-500"
                     onClick={() => handleEditFavorite(fav.id)}
                   />
                 </Button>
-                <Button variant="danger" size="sm" className="rounded-md text-lg">
+                <Button variant="danger" size="sm" className="rounded-md md:text-lg text-xl">
                   <AiOutlineDelete
                     className="text-red-500"
                     onClick={() => handleDeleteFavorite(fav.id)}

@@ -1,49 +1,95 @@
 import { signOut, useSession } from "next-auth/react";
+import { useState } from "react";
 import { Button } from "@/components/elements/Button";
+
+const NAV_ITEMS = [
+  { href: "#user", label: "ユーザー情報" },
+  { href: "#summary", label: "交通費合計" },
+  { href: "#list", label: "交通費一覧" },
+  { href: "#form", label: "交通費申請" },
+  { href: "#favorite", label: "お気に入り経路" },
+];
 
 export const Header = () => {
   const { data: session } = useSession();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
-    <header className="mb-6 rounded-2xl bg-white p-4 shadow-lg sm:mb-8 sm:p-6">
-      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <header className="mb-6 rounded-2xl bg-white p-4 shadow-lg md:mb-8 md:p-6">
+      <div className="flex items-center justify-between md:flex-row md:items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">TransiTrack 2</h1>
           <p className="mt-1 text-sm text-gray-600 sm:text-base">
             ようこそ、{session?.user?.name}さん
           </p>
         </div>
-        <nav>
-          <ul className="flex items-center gap-2 text-sm">
-            <li>
-              <a href="#user">ユーザー情報</a>
-            </li>
-            |
-            <li>
-              <a href="#summary">交通費合計</a>
-            </li>
-            |
-            <li>
-              <a href="#list">交通費一覧</a>
-            </li>
-            |
-            <li>
-              <a href="#form">交通費申請</a>
-            </li>
-            |
-            <li>
-              <a href="#favorite">お気に入り経路</a>
-            </li>
+
+        {/* PC用ナビ */}
+        <nav className="hidden md:block">
+          <ul className="flex items-center gap-1 text-sm">
+            {NAV_ITEMS.map(({ href, label }) => (
+              <li key={href}>
+                <a
+                  href={href}
+                  className="rounded-lg px-3 py-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
-        <Button
-          variant="secondary"
-          size="md"
-          onClick={() => signOut()}
-          className="w-full px-4 sm:w-auto"
-        >
-          ログアウト
-        </Button>
+
+        <div className="flex items-center gap-2">
+          {/* ハンバーガーボタン（モバイルのみ） */}
+          <button
+            type="button"
+            className="flex flex-col gap-1.5 p-2 md:hidden"
+            onClick={() => setIsMenuOpen((v) => !v)}
+            aria-label="メニュー"
+          >
+            <span className="block h-0.5 w-6 bg-gray-700" />
+            <span className="block h-0.5 w-6 bg-gray-700" />
+            <span className="block h-0.5 w-6 bg-gray-700" />
+          </button>
+
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => signOut()}
+            className="hidden px-4 sm:block"
+          >
+            ログアウト
+          </Button>
+        </div>
       </div>
+
+      {/* モバイル用ドロップダウンメニュー */}
+      {isMenuOpen && (
+        <nav className="mt-4 border-t border-gray-100 pt-4 md:hidden">
+          <ul className="flex flex-col gap-5">
+            {NAV_ITEMS.map(({ href, label }) => (
+              <li key={href}>
+                <a
+                  href={href}
+                  className="block text-sm text-gray-700"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => signOut()}
+            className="mt-6 w-full px-4"
+          >
+            ログアウト
+          </Button>
+        </nav>
+      )}
     </header>
   );
 };
