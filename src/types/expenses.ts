@@ -46,3 +46,10 @@ export interface ExpenseRecord extends Expense {
 }
 
 export type ExpenseInput = Omit<Expense, "memberId">;
+
+/**
+ * 申請の編集タイプ
+ * save: 新規作成、更新
+ * delete: 削除
+ */
+export type SubmitAction = "save" | "delete";

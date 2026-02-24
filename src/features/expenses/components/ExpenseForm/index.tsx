@@ -6,6 +6,7 @@ import { Input } from "@/components/elements/Input";
 import { useToast } from "@/hooks/useToast";
 import type { FavoriteRouteResponseItem } from "@/features/expenses/favoriteRoutesApiClient";
 import type { FavoriteRouteInput } from "@/types/favoriteRoutes";
+import type { SubmitAction } from "@/types/expenses";
 
 // 交通費申請フォームカードコンポーネント
 interface ExpenseFormProps {
@@ -21,7 +22,7 @@ interface ExpenseFormProps {
    * 申請の作成/更新が成功したタイミングで呼ばれるコールバック
    * （親側でトースト表示やリストの再取得トリガーを行う用途）
    */
-  onSuccess?: () => void;
+  onSuccess: (action: SubmitAction) => void;
   /**
    * 交通費申請フォームの内容からお気に入り経路を保存する関数
    */
@@ -47,7 +48,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
   // 成功状態になったタイミングで親へ通知（例: リスト再取得やトースト表示）
   useEffect(() => {
     if (submitSuccess) {
-      onSuccess?.();
+      onSuccess("save");
     }
   }, [submitSuccess, onSuccess]);
 
