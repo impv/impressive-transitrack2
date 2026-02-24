@@ -8,10 +8,11 @@ import { ExpensesList } from "@/features/expenses/components/ExpensesList";
 import { ExpenseForm } from "@/features/expenses/components/ExpenseForm";
 import { Header } from "@/components/elements/Header";
 import { Card } from "@/components/elements/Card";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FavoriteRouteManagement } from "@/features/expenses/components/FavoriteRouteManagement";
 import { useFavoriteRoutes } from "@/features/expenses/hooks/useFavoriteRoutes";
 import { ScrollToTopButton } from "@/components/elements/ScrollToTopButton";
+import type { SubmitAction } from "@/types/expenses";
 
 const Dashboard = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -40,10 +41,13 @@ const Dashboard = () => {
 
   const { toastMessage, showToast } = useToast();
 
-  const handleSubmitSuccess = () => {
-    setRefreshTrigger((v) => v + 1);
-    showToast("申請を更新しました");
-  };
+  const handleSubmit = useCallback(
+    (action: SubmitAction) => {
+      setRefreshTrigger((v) => v + 1);
+      showToast(action === "save" ? "申請を更新しました" : "申請を削除しました");
+    },
+    [showToast],
+  );
 
   // 未ログイン時はリダイレクト中の表示
   if (status === "loading") {
@@ -80,13 +84,13 @@ const Dashboard = () => {
 
         {/* 交通費申請リストカード */}
         <Card className="mt-6 sm:mt-8">
-          <ExpensesList refreshTrigger={refreshTrigger} />
+          <ExpensesList refreshTrigger={refreshTrigger} onSuccess={handleSubmit} />
         </Card>
 
         {/* 交通費申請フォームカード */}
         <Card className="mt-6 sm:mt-8">
           <ExpenseForm
-            onSuccess={handleSubmitSuccess}
+            onSuccess={handleSubmit}
             favorites={favorites}
             isFavoriteSaving={isFavoriteSaving}
             saveFromExpenseForm={saveFromExpenseForm}

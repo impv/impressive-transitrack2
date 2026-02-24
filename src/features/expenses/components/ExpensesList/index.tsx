@@ -1,5 +1,4 @@
-import { useToast } from "@/hooks/useToast";
-import type { ExpenseRecord } from "@/types/expenses";
+import type { ExpenseRecord, SubmitAction } from "@/types/expenses";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useExpenseEdit } from "@/features/expenses/hooks/useExpenseEdit";
@@ -18,11 +17,14 @@ interface ExpenseListProps {
    * 交通費データ再取得用トリガー
    */
   refreshTrigger: number;
+  /**
+   * 交通費の更新・削除成功時のコールバック
+   */
+  onSuccess: (action: SubmitAction) => void;
 }
 
-export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
+export const ExpensesList = ({ refreshTrigger, onSuccess }: ExpenseListProps) => {
   const { data: session } = useSession();
-  const { showToast } = useToast();
 
   const [listYearMonth, setListYearMonth] = useState<string>(getCurrentYearMonth());
   const [listExpenses, setListExpenses] = useState<ExpenseRecord[]>([]);
@@ -74,13 +76,12 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
             : p,
         ),
       );
-
-      showToast("申請を更新しました");
       setSelectedExpenseId(null);
+      onSuccess("save");
     },
     onDeleteSuccess: (deletedId: string) => {
       setListExpenses((prev) => prev.filter((expense) => expense.id !== deletedId));
-      showToast("申請を削除しました");
+      onSuccess("delete");
     },
   });
 
