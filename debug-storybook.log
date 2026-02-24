@@ -1,0 +1,180 @@
+[11:33:47.958] [INFO] [36mInitializing Storybook[39m
+[11:33:48.151] [DEBUG] Getting package.json info for /Users/imaimisato/imv/transitrack2/package.json...
+[11:33:48.152] [DEBUG] Getting CLI versions from NPM for storybook...
+[11:33:48.152] [DEBUG] Executing command: pnpm info storybook version
+[11:33:48.610] [INFO] Adding Storybook version 10.2.10 to your project
+[11:33:48.611] [DEBUG] Project type detected: nextjs
+[11:33:48.611] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:33:48.613] [INFO] Framework detected: nextjs-vite
+[11:33:48.614] [DEBUG] Getting installed version for vitest...
+[11:33:48.614] [DEBUG] Executing command: pnpm list "vitest" --json --depth=99
+[11:33:48.733] [DEBUG] Installed version for vitest: null
+[11:33:48.733] [DEBUG] Getting installed version for msw...
+[11:33:48.733] [DEBUG] Executing command: pnpm list "msw" --json --depth=99
+[11:33:48.856] [DEBUG] Installed version for msw: null
+[11:35:09.304] [PROMPT] What configuration should we install? {"choice":"recommended"}
+[11:35:09.305] [INFO] Storybook collects completely anonymous usage telemetry. We use it to shape Storybook's roadmap and prioritize features. You can learn more, including how to opt out, at https://storybook.js.org/telemetry
+[11:35:10.370] [INFO] base-generator-task-start: Generating Storybook configuration
+[11:35:10.370] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:10.370] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:10.370] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:10.371] [DEBUG] Using cached version for storybook...
+[11:35:10.371] [DEBUG] Getting CLI versions from NPM for @storybook/nextjs-vite...
+[11:35:10.371] [DEBUG] Executing command: pnpm info @storybook/nextjs-vite version
+[11:35:10.374] [DEBUG] Getting CLI versions from NPM for @chromatic-com/storybook...
+[11:35:10.374] [DEBUG] Executing command: pnpm info @chromatic-com/storybook version
+[11:35:10.375] [DEBUG] Getting CLI versions from NPM for @storybook/addon-vitest...
+[11:35:10.375] [DEBUG] Executing command: pnpm info @storybook/addon-vitest version
+[11:35:10.376] [DEBUG] Getting CLI versions from NPM for @storybook/addon-a11y...
+[11:35:10.376] [DEBUG] Executing command: pnpm info @storybook/addon-a11y version
+[11:35:10.384] [DEBUG] Getting CLI versions from NPM for @storybook/addon-docs...
+[11:35:10.384] [DEBUG] Executing command: pnpm info @storybook/addon-docs version
+[11:35:10.386] [DEBUG] Getting CLI versions from NPM for vite...
+[11:35:10.386] [DEBUG] Executing command: pnpm info vite version
+[11:35:12.636] [INFO] base-generator-task: - Configuring main.ts
+[11:35:12.637] [INFO] base-generator-task: - Configuring preview.ts
+[11:35:12.637] [INFO] base-generator-task: - Adding Storybook command to package.json
+[11:35:12.637] [DEBUG] Getting package.json info for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:12.637] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:12.637] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:12.638] [INFO] base-generator-task: - Copying framework templates
+[11:35:12.653] [DEBUG] Executing command: pnpm config get registry
+[11:35:13.500] [INFO] base-generator-task-success: Storybook configuration generated
+[11:35:13.500] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:13.500] [DEBUG] Using cached installed version for vitest...
+[11:35:13.500] [DEBUG] Getting installed version for @vitest/coverage-v8...
+[11:35:13.500] [DEBUG] Executing command: pnpm list "@vitest/coverage-v8" --json --depth=99
+[11:35:13.635] [DEBUG] Installed version for @vitest/coverage-v8: null
+[11:35:13.635] [DEBUG] Getting installed version for @vitest/coverage-istanbul...
+[11:35:13.635] [DEBUG] Executing command: pnpm list "@vitest/coverage-istanbul" --json --depth=99
+[11:35:13.761] [DEBUG] Installed version for @vitest/coverage-istanbul: null
+[11:35:13.762] [INFO] adding-dependencies-task-start: Adding dependencies to package.json
+[11:35:13.762] [INFO] adding-dependencies-task: Adding devDependencies:
+- storybook@^10.2.10
+- @storybook/nextjs-vite@^10.2.10
+- @chromatic-com/storybook@^5.0.1
+- @storybook/addon-vitest@^10.2.10
+- @storybook/addon-a11y@^10.2.10
+- @storybook/addon-docs@^10.2.10
+- vite@^7.3.1
+- vitest
+- playwright
+- @vitest/browser-playwright
+- @vitest/coverage-v8
+[11:35:13.762] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:13.762] [DEBUG] Using cached version for storybook...
+[11:35:13.762] [DEBUG] Using cached version for @storybook/nextjs-vite...
+[11:35:13.762] [DEBUG] Using cached version for @chromatic-com/storybook...
+[11:35:13.762] [DEBUG] Using cached version for @storybook/addon-vitest...
+[11:35:13.762] [DEBUG] Using cached version for @storybook/addon-a11y...
+[11:35:13.762] [DEBUG] Using cached version for @storybook/addon-docs...
+[11:35:13.762] [DEBUG] Using cached version for vite...
+[11:35:13.762] [DEBUG] Getting CLI versions from NPM for vitest...
+[11:35:13.762] [DEBUG] Executing command: pnpm info vitest version
+[11:35:14.245] [DEBUG] Getting CLI versions from NPM for playwright...
+[11:35:14.245] [DEBUG] Executing command: pnpm info playwright version
+[11:35:15.287] [DEBUG] Getting CLI versions from NPM for @vitest/browser-playwright...
+[11:35:15.287] [DEBUG] Executing command: pnpm info @vitest/browser-playwright version
+[11:35:15.619] [DEBUG] Getting CLI versions from NPM for @vitest/coverage-v8...
+[11:35:15.619] [DEBUG] Executing command: pnpm info @vitest/coverage-v8 version
+[11:35:15.970] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:15.970] [INFO] adding-dependencies-task-success: Dependencies added to package.json
+[11:35:15.971] [INFO] Installing dependencies...
+[11:35:15.971] [INFO] install-dependencies-spinner-start: Installing dependencies...
+[11:35:15.971] [DEBUG] Executing command: pnpm install -w
+[11:35:16.291] [INFO] Installing dependencies...: Progress: resolved 0, reused 1, downloaded 0, added 0
+
+[11:35:16.291] [INFO] install-dependencies-spinner: Installing dependencies...: Progress: resolved 0, reu
+[11:35:16.515] [INFO] Installing dependencies...: 
+   ╭──────────────────────────────────────────╮
+   │                                          │
+   │   Update available! 10.24.0 → 10.30.0.   │
+   │   Changelog: https://pnpm.io/v/10.30.0   │
+   │     To update, run: pnpm self-update     │
+   │                                          │
+   ╰──────────────────────────────────────────╯
+
+
+[11:35:16.515] [INFO] install-dependencies-spinner: Installing dependencies...: ╭────────────────────────
+[11:35:16.598] [INFO] Installing dependencies...:  ERR_PNPM_NO_MATCHING_VERSION  No matching version found for @chromatic-com/storybook@^5.0.1 published by Thu Jan 29 2026 11:35:16 GMT+0900 (GMT+09:00) while fetching it from https://registry.npmjs.org/. Version 5.0.1 satisfies the specs but was released at Mon Feb 09 2026 17:54:22 GMT+0900 (GMT+09:00)
+
+This error happened while installing a direct dependency of /Users/imaimisato/imv/transitrack2
+
+The latest release of @chromatic-com/storybook is "5.0.1". Published at 2026-2-9
+
+Other releases are:
+  * backport-1.4.1: 1.4.1 published at 2024-6-28
+  * backport-1.5.1: 1.5.1 published at 2024-6-28
+  * backport: 3.2.7 published at 2025-6-20
+  * next: 5.0.1-next.1 published at 2026-2-6
+  * canary: 5.0.1--canary.01b63e6.0 published at 2026-2-6
+
+If you need the full list of all 578 published versions run "$ pnpm view @chromatic-com/storybook versions".
+
+If you want to install the matched version ignoring the time it was published, you can add the package name to the minimumReleaseAgeExclude setting. Read more about it: https://pnpm.io/settings#minimumreleaseageexclude
+
+[11:35:16.598] [INFO] install-dependencies-spinner: Installing dependencies...: ERR_PNPM_NO_MATCHING_VERS
+[11:35:16.623] [ERROR] Installation of dependencies failed! {"error":"ExecaError: Command failed with exit code 1: pnpm install -w\n\nProgress: resolved 0, reused 1, downloaded 0, added 0\n\n   ╭──────────────────────────────────────────╮\n   │                                          │\n   │   Update available! 10.24.0 → 10.30.0.   │\n   │   Changelog: https://pnpm.io/v/10.30.0   │\n   │     To update, run: pnpm self-update     │\n   │                                          │\n   ╰──────────────────────────────────────────╯\n\n\\u2009ERR_PNPM_NO_MATCHING_VERSION\\u2009 No matching version found for @chromatic-com/storybook@^5.0.1 published by Thu Jan 29 2026 11:35:16 GMT+0900 (GMT+09:00) while fetching it from https://registry.npmjs.org/. Version 5.0.1 satisfies the specs but was released at Mon Feb 09 2026 17:54:22 GMT+0900 (GMT+09:00)\n\nThis error happened while installing a direct dependency of /Users/imaimisato/imv/transitrack2\n\nThe latest release of @chromatic-com/storybook is \"5.0.1\". Published at 2026-2-9\n\nOther releases are:\n  * backport-1.4.1: 1.4.1 published at 2024-6-28\n  * backport-1.5.1: 1.5.1 published at 2024-6-28\n  * backport: 3.2.7 published at 2025-6-20\n  * next: 5.0.1-next.1 published at 2026-2-6\n  * canary: 5.0.1--canary.01b63e6.0 published at 2026-2-6\n\nIf you need the full list of all 578 published versions run \"$ pnpm view @chromatic-com/storybook versions\".\n\nIf you want to install the matched version ignoring the time it was published, you can add the package name to the minimumReleaseAgeExclude setting. Read more about it: https://pnpm.io/settings#minimumreleaseageexclude\n    at getFinalError (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-URMZXQZT.js:13109:10)\n    at makeError (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-URMZXQZT.js:14645:15)\n    at getAsyncResult (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-URMZXQZT.js:17291:158)\n    at handlePromise (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-URMZXQZT.js:17277:162)\n    at async Object.executeTaskWithSpinner (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-7ZPQ47DO.js:3683:11)\n    at async PNPMProxy.installDependencies (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-URMZXQZT.js:11258:5)\n    at async DependencyInstallationCommand.execute (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/create-storybook/dist/_node-chunks/chunk-ZWXSN5R5.js:2072:9)\n    at async doInitiate (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/create-storybook/dist/_node-chunks/chunk-ZWXSN5R5.js:2848:38)\n    at async file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/create-storybook/dist/_node-chunks/chunk-ZWXSN5R5.js:2882:20\n    at async withTelemetry (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-S3MWHNYJ.js:218:12)"}
+[11:35:16.623] [ERROR] install-dependencies-spinner-error: [31mInstallation of dependencies failed![39m
+[11:35:16.626] [INFO] configure-addons-task-start: Configuring addons...
+[11:35:16.626] [INFO] configure-addons-task: Configuring @chromatic-com/storybook...
+[11:35:16.627] [INFO] configure-addons-task: @chromatic-com/storybook configured
+
+[11:35:16.627] [INFO] configure-addons-task: Configuring @storybook/addon-vitest...
+[11:35:16.628] [DEBUG] Getting package.json info for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:16.628] [DEBUG] Using cached package.json for /Users/imaimisato/imv/transitrack2/package.json...
+[11:35:16.628] [DEBUG] Using cached installed version for vitest...
+[11:35:16.628] [DEBUG] Vitest version specifier: 4.0.18
+[11:35:16.718] [DEBUG] Using cached installed version for vitest...
+[11:35:16.718] [DEBUG] Using cached installed version for msw...
+[11:35:16.719] [INFO] Creating a Vitest setup file for Storybook:
+[11:35:16.719] [INFO] /Users/imaimisato/imv/transitrack2/.storybook/vitest.setup.ts
+
+[11:35:16.725] [INFO] Creating a Vitest config file:
+[11:35:16.725] [INFO] /Users/imaimisato/imv/transitrack2/vitest.config.ts
+[11:35:16.729] [INFO] Setting up a11y addon for @storybook/addon-vitest
+[11:35:16.729] [INFO] Setting up a11y addon for @storybook/addon-vitest
+[11:35:16.729] [DEBUG] Executing command: pnpm dlx storybook@10.2.10 automigrate addon-a11y-addon-test --loglevel silent --yes --skip-doctor --package-manager pnpm --skip-install
+[11:35:25.789] [INFO] a11y addon setup successfully
+[11:35:25.789] [INFO] [32ma11y addon setup successfully[39m
+[11:35:25.789] [INFO] [32m@storybook/addon-vitest setup completed successfully[39m
+[11:35:25.789] [INFO] @storybook/addon-vitest is now configured and you're ready to run your tests!
+Here are a couple of tips to get you started:
+
+• You can run tests with "[36mnpx vitest[39m"
+• Vitest IDE extension shows all stories as tests in your editor!
+
+Check the documentation for more information about its features and options at:
+https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
+[11:35:25.789] [INFO] configure-addons-task: @storybook/addon-vitest configured
+
+[11:35:25.790] [INFO] configure-addons-task: Configuring @storybook/addon-a11y...
+[11:35:25.790] [DEBUG] Executing command: pnpm dlx storybook@10.2.10 automigrate addon-a11y-addon-test --loglevel silent --skip-doctor --package-manager pnpm --config-dir .storybook
+[11:35:27.709] [INFO] configure-addons-task: @storybook/addon-a11y configured
+
+[11:35:27.709] [INFO] configure-addons-task: Configuring @storybook/addon-docs...
+[11:35:27.710] [INFO] configure-addons-task: @storybook/addon-docs configured
+
+[11:35:27.711] [INFO] configure-addons-task-success: Addons configured successfully
+[11:35:27.711] [INFO] [2m✅ @chromatic-com/storybook[22m
+[11:35:27.711] [INFO] [2m✅ @storybook/addon-vitest[22m
+[11:35:27.711] [INFO] [2m✅ @storybook/addon-a11y[22m
+[11:35:27.712] [INFO] [2m✅ @storybook/addon-docs[22m
+[11:35:27.712] [INFO] Playwright browser binaries are necessary for @storybook/addon-vitest. The download can take some time. If you don't want to wait, you can skip the installation and run the following command manually later:
+[36mpnpm exec playwright install chromium --with-deps[39m
+[11:36:36.078] [PROMPT] Do you want to install Playwright with Chromium now? {"choice":true}
+[11:36:36.078] [INFO] Installing Playwright browser binaries (press "c" to abort)
+[11:36:36.079] [INFO] playwright-installation-spinner-start: Installing Playwright browser binaries (press "c" to abort)
+[11:36:36.081] [DEBUG] Executing command: pnpm exec playwright install chromium --with-deps
+[11:36:36.365] [INFO] Installing Playwright browser binaries (press "c" to abort): undefined
+
+[11:36:36.365] [INFO] playwright-installation-spinner: Installing Playwright browser binaries (press "c" to abort): undefined
+[11:36:36.366] [INFO] Installing Playwright browser binaries (press "c" to abort):  ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command "playwright" not found
+
+[11:36:36.366] [INFO] playwright-installation-spinner: Installing Playwright browser binaries (press "c" to abort): ERR_PNPM_RECURSIVE_EXEC_F
+[11:36:36.387] [ERROR] An error occurred while installing Playwright browser binaries. Please run the following command later: pnpm exec playwright install chromium --with-deps {"error":"ExecaError: Command failed with exit code 254: pnpm exec playwright install chromium --with-deps\n\nundefined\n\\u2009ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL\\u2009 Command \"playwright\" not found\n    at getFinalError (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-URMZXQZT.js:13109:10)\n    at makeError (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-URMZXQZT.js:14645:15)\n    at getAsyncResult (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-URMZXQZT.js:17291:158)\n    at handlePromise (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-URMZXQZT.js:17277:162)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.executeTaskWithSpinner (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-7ZPQ47DO.js:3683:11)\n    at async AddonVitestService.installPlaywright (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/storybook/dist/_node-chunks/chunk-QQUKUQCR.js:5842:17)\n    at async AddonConfigurationCommand.execute (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/create-storybook/dist/_node-chunks/chunk-ZWXSN5R5.js:1969:26)\n    at async doInitiate (file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/create-storybook/dist/_node-chunks/chunk-ZWXSN5R5.js:2854:38)\n    at async file:///Users/imaimisato/.npm/_npx/c888cdf029e30e47/node_modules/create-storybook/dist/_node-chunks/chunk-ZWXSN5R5.js:2882:20"}
+[11:36:36.388] [ERROR] playwright-installation-spinner-error: [31mAn error occurred while installing Playwright browser binaries. Please run the following command later: pnpm exec playwright install chromium --with-deps[39m
+[11:36:37.429] [WARN] Storybook setup completed, but some non-blocking errors occurred. Please check the log file below for details.
+[11:36:37.431] [INFO] To run Storybook manually, run [36mpnpm run storybook[39m. CTRL+C to stop.
+[11:36:37.433] [INFO] Wanna know more about Storybook? Check out [36mhttps://storybook.js.org/[39m
+Having trouble or want to chat? Join us at [36mhttps://discord.gg/storybook/[39m

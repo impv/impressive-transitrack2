@@ -3,12 +3,19 @@ import { useState } from "react";
 import { Button } from "@/components/elements/Button";
 
 const NAV_ITEMS = [
-  { href: "#user", label: "ユーザー情報" },
-  { href: "#summary", label: "交通費合計" },
-  { href: "#list", label: "交通費一覧" },
-  { href: "#form", label: "交通費申請" },
-  { href: "#favorite", label: "お気に入り経路" },
+  { id: "user", label: "ユーザー情報" },
+  { id: "summary", label: "交通費合計" },
+  { id: "list", label: "交通費一覧" },
+  { id: "form", label: "交通費申請" },
+  { id: "favorite", label: "お気に入り経路" },
 ];
+
+const scrollToSection = (id: string) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
 
 export const Header = () => {
   const { data: session } = useSession();
@@ -27,14 +34,15 @@ export const Header = () => {
         {/* PC用ナビ */}
         <nav className="hidden md:block">
           <ul className="flex items-center gap-1 text-sm">
-            {NAV_ITEMS.map(({ href, label }) => (
-              <li key={href}>
-                <a
-                  href={href}
+            {NAV_ITEMS.map(({ id, label }) => (
+              <li key={id}>
+                <button
+                  type="button"
+                  onClick={() => scrollToSection(id)}
                   className="rounded-lg px-3 py-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
                   {label}
-                </a>
+                </button>
               </li>
             ))}
           </ul>
@@ -68,15 +76,18 @@ export const Header = () => {
       {isMenuOpen && (
         <nav className="mt-4 border-t border-gray-100 pt-4 md:hidden">
           <ul className="flex flex-col gap-5">
-            {NAV_ITEMS.map(({ href, label }) => (
-              <li key={href}>
-                <a
-                  href={href}
+            {NAV_ITEMS.map(({ id, label }) => (
+              <li key={id}>
+                <button
+                  type="button"
                   className="block text-sm text-gray-700"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    scrollToSection(id);
+                    setIsMenuOpen(false);
+                  }}
                 >
                   {label}
-                </a>
+                </button>
               </li>
             ))}
           </ul>

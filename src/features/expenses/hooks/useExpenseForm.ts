@@ -2,7 +2,7 @@ import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createExpense } from "@/features/expenses/apiClient";
 import {
-  runValidations,
+  validate,
   validateAmount,
   validateDate,
   validateNotFutureDate,
@@ -49,7 +49,7 @@ export const useExpenseForm = (): UseExpenseFormResult => {
       setSubmitError(null);
       setSubmitSuccess(false);
 
-      const validation = runValidations(
+      const validation = validate(
         validateRequired({
           date: expenseForm.date,
           departure: expenseForm.departure,
