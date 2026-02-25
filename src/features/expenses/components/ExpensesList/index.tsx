@@ -1,5 +1,4 @@
-import { useToast } from "@/hooks/useToast";
-import type { ExpenseRecord } from "@/types/expenses";
+import type { ExpenseRecord, SubmitAction } from "@/types/expenses";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useExpenseEdit } from "@/features/expenses/hooks/useExpenseEdit";
@@ -18,11 +17,14 @@ interface ExpenseListProps {
    * 交通費データ再取得用トリガー
    */
   refreshTrigger: number;
+  /**
+   * 交通費の更新・削除成功時のコールバック
+   */
+  onSuccess: (action: SubmitAction) => void;
 }
 
-export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
+export const ExpensesList = ({ refreshTrigger, onSuccess }: ExpenseListProps) => {
   const { data: session } = useSession();
-  const { showToast } = useToast();
 
   const [listYearMonth, setListYearMonth] = useState<string>(getCurrentYearMonth());
   const [listExpenses, setListExpenses] = useState<ExpenseRecord[]>([]);
@@ -54,6 +56,7 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
     expenseEditForm,
     selectedExpenseId,
     isUpdating: isEditUpdating,
+    errors: editErrors,
     setExpenseEditForm,
     submitUpdate,
     setSelectedExpenseId,
@@ -73,13 +76,12 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
             : p,
         ),
       );
-
-      showToast("申請を更新しました");
       setSelectedExpenseId(null);
+      onSuccess("save");
     },
     onDeleteSuccess: (deletedId: string) => {
       setListExpenses((prev) => prev.filter((expense) => expense.id !== deletedId));
-      showToast("申請を削除しました");
+      onSuccess("delete");
     },
   });
 
@@ -210,11 +212,20 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                             await submitUpdate(expense.id);
                           } catch (err) {
                             console.error("更新に失敗しました:", err);
-                            alert("更新に失敗しました。入力内容を確認してください。");
                           }
                         }}
+                        noValidate
                         className="mt-3 space-y-3"
                       >
+                        {editErrors.length > 0 && (
+                          <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800">
+                            <ul className="list-disc pl-4 space-y-1">
+                              {editErrors.map((msg) => (
+                                <li key={msg}>{msg}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                         <div className="grid grid-cols-1 gap-3">
                           <div>
                             <label
@@ -230,7 +241,7 @@ export const ExpensesList = ({ refreshTrigger }: ExpenseListProps) => {
                               onChange={(e) =>
                                 setExpenseEditForm({ ...expenseEditForm, date: e.target.value })
                               }
-                              className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
+                              className="w-full max-w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
                               required
                             />
                           </div>

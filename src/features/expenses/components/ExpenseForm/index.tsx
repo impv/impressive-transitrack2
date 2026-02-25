@@ -6,6 +6,7 @@ import { Input } from "@/components/elements/Input";
 import { useToast } from "@/hooks/useToast";
 import type { FavoriteRouteResponseItem } from "@/features/expenses/favoriteRoutesApiClient";
 import type { FavoriteRouteInput } from "@/types/favoriteRoutes";
+import type { SubmitAction } from "@/types/expenses";
 
 // 交通費申請フォームカードコンポーネント
 interface ExpenseFormProps {
@@ -21,7 +22,7 @@ interface ExpenseFormProps {
    * 申請の作成/更新が成功したタイミングで呼ばれるコールバック
    * （親側でトースト表示やリストの再取得トリガーを行う用途）
    */
-  onSuccess?: () => void;
+  onSuccess: (action: SubmitAction) => void;
   /**
    * 交通費申請フォームの内容からお気に入り経路を保存する関数
    */
@@ -38,7 +39,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
   const {
     expenseForm,
     isSubmitting,
-    submitError,
+    submitErrors,
     submitSuccess,
     setExpenseForm,
     handleSubmitExpense,
@@ -47,7 +48,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
   // 成功状態になったタイミングで親へ通知（例: リスト再取得やトースト表示）
   useEffect(() => {
     if (submitSuccess) {
-      onSuccess?.();
+      onSuccess("save");
     }
   }, [submitSuccess, onSuccess]);
 
@@ -58,8 +59,14 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
       </h2>
 
       {/* エラーメッセージ */}
-      {submitError && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{submitError}</div>
+      {submitErrors.length > 0 && (
+        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">
+          <ul className="list-disc pl-4 space-y-1">
+            {submitErrors.map((msg) => (
+              <li key={msg}>{msg}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* 成功メッセージ */}
@@ -106,7 +113,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmitExpense} className="space-y-4">
+      <form onSubmit={handleSubmitExpense} noValidate className="space-y-4">
         {/* 日付 */}
         <div>
           <label htmlFor="date" className="mb-1 block text-sm font-medium text-gray-700">
