@@ -21,6 +21,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Empty: Story = {
+  args: {
+    onSuccess: () => {},
+  },
   async beforeEach() {
     window.fetch = async () =>
       new Response(JSON.stringify([]), {
@@ -31,6 +34,9 @@ export const Empty: Story = {
 };
 
 export const WithData: Story = {
+  args: {
+    onSuccess: () => {},
+  },
   async beforeEach() {
     window.fetch = async () =>
       new Response(JSON.stringify(mockExpenses), {
