@@ -8,7 +8,7 @@ import {
   validateNotFutureDate,
   validateRequired,
 } from "@/lib/validation";
-import type { ExpenseInput } from "@/types/expenses";
+import type { ExpenseInput, SubmitAction } from "@/types/expenses";
 
 const INITIAL_FORM_STATE: ExpenseInput = {
   date: "",
@@ -28,7 +28,7 @@ interface UseExpenseFormResult {
   submitSuccess: boolean;
 }
 
-export const useExpenseForm = (): UseExpenseFormResult => {
+export const useExpenseForm = (onSuccess: (action: SubmitAction) => void): UseExpenseFormResult => {
   const [expenseForm, setExpenseForm] = useState<ExpenseInput>(INITIAL_FORM_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitErrors, setSubmitErrors] = useState<string[]>([]);
@@ -71,6 +71,7 @@ export const useExpenseForm = (): UseExpenseFormResult => {
         await createExpense(expenseForm);
         setSubmitSuccess(true);
         setExpenseForm(INITIAL_FORM_STATE);
+        onSuccess("save");
 
         if (successTimeoutRef.current) {
           clearTimeout(successTimeoutRef.current);
@@ -83,7 +84,7 @@ export const useExpenseForm = (): UseExpenseFormResult => {
         setIsSubmitting(false);
       }
     },
-    [expenseForm],
+    [expenseForm, onSuccess],
   );
 
   return {

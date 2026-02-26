@@ -1,5 +1,4 @@
 import type { FC } from "react";
-import { useEffect } from "react";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
 import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
@@ -43,14 +42,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
     submitSuccess,
     setExpenseForm,
     handleSubmitExpense,
-  } = useExpenseForm();
-
-  // 成功状態になったタイミングで親へ通知（例: リスト再取得やトースト表示）
-  useEffect(() => {
-    if (submitSuccess) {
-      onSuccess("save");
-    }
-  }, [submitSuccess, onSuccess]);
+  } = useExpenseForm(onSuccess);
 
   return (
     <>
