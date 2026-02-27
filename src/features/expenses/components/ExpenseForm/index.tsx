@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useState } from "react";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
 import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
@@ -34,6 +35,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
   onSuccess,
   saveFromExpenseForm,
 }) => {
+  const [selectedFavoriteId, setSelectedFavoriteId] = useState("");
   const { showToast } = useToast();
   const {
     expenseForm,
@@ -42,7 +44,8 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
     submitSuccess,
     setExpenseForm,
     handleSubmitExpense,
-  } = useExpenseForm(onSuccess);
+    resetForm,
+  } = useExpenseForm((action) => { setSelectedFavoriteId(""); onSuccess(action); });
 
   return (
     <>
@@ -76,8 +79,9 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
           </label>
           <select
             id="favoriteSelect"
-            value=""
+            value={selectedFavoriteId}
             onChange={(e) => {
+              setSelectedFavoriteId(e.target.value);
               const selected = favorites.find((f) => f.id === e.target.value);
               if (selected) {
                 setExpenseForm({
@@ -158,8 +162,8 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
           </label>
           <Input
             id="fare"
-            type="number"
-            value={expenseForm.amount}
+            type="text"
+            value={expenseForm.amount || ""}
             onChange={(e) =>
               setExpenseForm({
                 ...expenseForm,
@@ -167,8 +171,6 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
               })
             }
             placeholder="例: 200"
-            min="1"
-            step="1"
             required
           />
         </div>
@@ -256,10 +258,22 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
           )}
         </fieldset>
 
-        {/* 送信ボタン */}
-        <Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting}>
-          {isSubmitting ? "送信中..." : "申請する"}
-        </Button>
+        {/* 送信・クリアボタン */}
+        <div className="flex gap-2">
+          <Button type="submit" variant="primary" size="lg" className="flex-1" disabled={isSubmitting}>
+            {isSubmitting ? "送信中..." : "申請する"}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            className="flex-1"
+            onClick={() => { resetForm(); setSelectedFavoriteId(""); }}
+            disabled={isSubmitting}
+          >
+            クリア
+          </Button>
+        </div>
       </form>
 
       {/* この経路をお気に入りに保存 */}

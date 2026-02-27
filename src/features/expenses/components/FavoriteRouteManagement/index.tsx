@@ -72,8 +72,8 @@ export const FavoriteRouteManagement = ({
         お気に入り経路
       </h2>
 
-      {/* 登録/編集フォーム */}
-      <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+      {/* 編集フォーム（編集モード時のみ表示） */}
+      {editingFavoriteId && <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
         <h3 className="mb-3 text-sm font-semibold text-gray-800">
           {editingFavoriteId ? "お気に入り経路を編集" : "お気に入り経路を登録"}
         </h3>
@@ -219,7 +219,7 @@ export const FavoriteRouteManagement = ({
             </Button>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* お気に入り一覧 */}
       {isFavoritesLoading ? (

@@ -23,6 +23,7 @@ interface UseExpenseFormResult {
   expenseForm: ExpenseInput;
   setExpenseForm: Dispatch<SetStateAction<ExpenseInput>>;
   handleSubmitExpense: (event: FormEvent) => Promise<void>;
+  resetForm: () => void;
   isSubmitting: boolean;
   submitErrors: string[];
   submitSuccess: boolean;
@@ -87,10 +88,17 @@ export const useExpenseForm = (onSuccess: (action: SubmitAction) => void): UseEx
     [expenseForm, onSuccess],
   );
 
+  const resetForm = () => {
+    setExpenseForm(INITIAL_FORM_STATE);
+    setSubmitErrors([]);
+    setSubmitSuccess(false);
+  };
+
   return {
     expenseForm,
     setExpenseForm,
     handleSubmitExpense,
+    resetForm,
     isSubmitting,
     submitErrors,
     submitSuccess,
