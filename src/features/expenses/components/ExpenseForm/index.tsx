@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useState } from "react";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
 import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
@@ -34,6 +35,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
   onSuccess,
   saveFromExpenseForm,
 }) => {
+  const [selectedFavoriteId, setSelectedFavoriteId] = useState("");
   const { showToast } = useToast();
   const {
     expenseForm,
@@ -43,7 +45,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
     setExpenseForm,
     handleSubmitExpense,
     resetForm,
-  } = useExpenseForm(onSuccess);
+  } = useExpenseForm((action) => { setSelectedFavoriteId(""); onSuccess(action); });
 
   return (
     <>
@@ -77,8 +79,9 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
           </label>
           <select
             id="favoriteSelect"
-            value=""
+            value={selectedFavoriteId}
             onChange={(e) => {
+              setSelectedFavoriteId(e.target.value);
               const selected = favorites.find((f) => f.id === e.target.value);
               if (selected) {
                 setExpenseForm({
@@ -265,7 +268,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
             variant="secondary"
             size="lg"
             className="flex-1"
-            onClick={resetForm}
+            onClick={() => { resetForm(); setSelectedFavoriteId(""); }}
             disabled={isSubmitting}
           >
             クリア
