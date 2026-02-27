@@ -42,6 +42,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
     submitSuccess,
     setExpenseForm,
     handleSubmitExpense,
+    resetForm,
   } = useExpenseForm(onSuccess);
 
   return (
@@ -158,8 +159,8 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
           </label>
           <Input
             id="fare"
-            type="number"
-            value={expenseForm.amount}
+            type="text"
+            value={expenseForm.amount || ""}
             onChange={(e) =>
               setExpenseForm({
                 ...expenseForm,
@@ -167,8 +168,6 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
               })
             }
             placeholder="例: 200"
-            min="1"
-            step="1"
             required
           />
         </div>
@@ -256,10 +255,22 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
           )}
         </fieldset>
 
-        {/* 送信ボタン */}
-        <Button type="submit" variant="primary" size="lg" fullWidth disabled={isSubmitting}>
-          {isSubmitting ? "送信中..." : "申請する"}
-        </Button>
+        {/* 送信・クリアボタン */}
+        <div className="flex gap-2">
+          <Button type="submit" variant="primary" size="lg" className="flex-1" disabled={isSubmitting}>
+            {isSubmitting ? "送信中..." : "申請する"}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            className="flex-1"
+            onClick={resetForm}
+            disabled={isSubmitting}
+          >
+            クリア
+          </Button>
+        </div>
       </form>
 
       {/* この経路をお気に入りに保存 */}

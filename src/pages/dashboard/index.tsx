@@ -2,7 +2,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useToast } from "@/hooks/useToast";
 import { SummaryExpenses } from "@/features/expenses/components/SummaryExpenses";
-import { UserDetail } from "@/components/elements/UserDetail";
 import { Toast } from "@/components/elements/Toast";
 import { ExpensesList } from "@/features/expenses/components/ExpensesList";
 import { ExpenseForm } from "@/features/expenses/components/ExpenseForm";
@@ -71,11 +70,6 @@ const Dashboard = () => {
       <div className="mx-auto max-w-4xl">
         {/* ヘッダー */}
         <Header />
-
-        {/* ユーザー情報カード */}
-        <Card>
-          <UserDetail />
-        </Card>
 
         {/* 交通費合計カード */}
         <Card className="mt-6 sm:mt-8">

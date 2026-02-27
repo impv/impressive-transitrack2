@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Button } from "@/components/elements/Button";
 
 const NAV_ITEMS = [
-  { id: "user", label: "ユーザー情報" },
   { id: "summary", label: "交通費合計" },
   { id: "list", label: "交通費一覧" },
   { id: "form", label: "交通費申請" },

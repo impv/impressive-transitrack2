@@ -134,14 +134,16 @@ export const SummaryExpenses = ({ refreshTrigger }: SummaryExpensesProps) => {
             onChange={(e) => setSummaryYearMonth(e.target.value)}
             className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
           />
-          <button
-            type="button"
-            className="text-2xl"
-            title="CSVをダウンロード"
-            onClick={handleDownloadCsv}
-          >
-            <MdDownload />
-          </button>
+          {session?.user?.isAdmin && (
+            <button
+              type="button"
+              className="text-2xl"
+              title="CSVをダウンロード"
+              onClick={handleDownloadCsv}
+            >
+              <MdDownload />
+            </button>
+          )}
         </div>
       </div>
       {session?.user?.isAdmin ? (
