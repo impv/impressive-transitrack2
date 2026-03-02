@@ -22,20 +22,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "GET") {
     try {
-      const { yearMonth } = req.query;
+      const { yearMonth, memberId } = req.query;
       const yearMonthStr = Array.isArray(yearMonth) ? yearMonth[0] : yearMonth;
+      const memberIdStr = Array.isArray(memberId) ? memberId[0] : memberId;
 
       if (yearMonthStr && !YEAR_MONTH_PATTERN.test(yearMonthStr)) {
         return res.status(400).json({ message: "yearMonth は YYYY-MM 形式で指定してください" });
       }
 
-      // yearMonth が指定されている場合はフィルタリング、未指定の場合は全件取得
-      const options = yearMonthStr ? { yearMonth: yearMonthStr } : undefined;
-
-      // 管理者の場合は全メンバーの申請を取得、それ以外は自分の申請のみ
+      // 管理者の場合は全メンバーの申請を取得（一覧ページの場合は１メンバーのみ）、それ以外は自分の申請のみ
       const expenses = session.user.isAdmin
-        ? await getAllExpenses(options)
-        : await getExpensesByMemberId(session.user.id, options);
+        ? await getAllExpenses({ yearMonth: yearMonthStr, memberId: memberIdStr })
+        : await getExpensesByMemberId(session.user.id, { yearMonth: yearMonthStr });
       return res.status(200).json(expenses);
     } catch (error) {
       console.error(error);

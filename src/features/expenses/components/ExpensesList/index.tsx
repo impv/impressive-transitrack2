@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useExpenseEdit } from "@/features/expenses/hooks/useExpenseEdit";
 import type { TransportType, TripType } from "@prisma/client";
 import { getExpenses } from "@/features/expenses/apiClient";
-import { getCurrentYearMonth } from "@/features/expenses/utils/getCurrentYearMonth";
+import { useSharedYearMonth } from "@/features/expenses/hooks/useSharedYearMonth";
 import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpenseRecords";
 import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
@@ -21,12 +21,24 @@ interface ExpenseListProps {
    * 交通費の更新・削除成功時のコールバック
    */
   onSuccess: (action: SubmitAction) => void;
+  /**
+   * 初期表示月（YYYY-MM形式）。未指定の場合は当月
+   */
+  initialYearMonth?: string;
+  /**
+   * フィルタリングするメンバーID（管理者が特定メンバーの申請を見る場合）
+   */
+  memberId?: string;
+  /**
+   * 表示するメンバー名（管理者ビューでデータがない場合にも名前を表示するために使用）
+   */
+  memberName?: string;
 }
 
-export const ExpensesList = ({ refreshTrigger, onSuccess }: ExpenseListProps) => {
+export const ExpensesList = ({ refreshTrigger, onSuccess, initialYearMonth, memberId, memberName }: ExpenseListProps) => {
   const { data: session } = useSession();
 
-  const [listYearMonth, setListYearMonth] = useState<string>(getCurrentYearMonth());
+  const [listYearMonth, setListYearMonth] = useSharedYearMonth(initialYearMonth);
   const [listExpenses, setListExpenses] = useState<ExpenseRecord[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -42,7 +54,7 @@ export const ExpensesList = ({ refreshTrigger, onSuccess }: ExpenseListProps) =>
 
     const fetchListExpenses = async () => {
       try {
-        const response = await getExpenses(listYearMonth);
+        const response = await getExpenses(listYearMonth, memberId);
         setListExpenses(normalizeExpenseRecords(response));
       } catch (error) {
         console.error("交通費一覧の取得に失敗しました:", error);
@@ -105,9 +117,20 @@ export const ExpensesList = ({ refreshTrigger, onSuccess }: ExpenseListProps) =>
         </div>
       </div>
       {listExpenses.length === 0 ? (
-        <p className="text-sm text-gray-600">選択した期間に交通費申請がありません。</p>
+        <>
+          {memberId && memberName && (
+            <p className="mb-3 text-base font-semibold text-gray-800">{memberName}</p>
+          )}
+          <p className="text-sm text-gray-600">選択した期間に交通費申請がありません。</p>
+        </>
       ) : (
-        <ul className="space-y-3">
+        <>
+          {memberId && (memberName ?? listExpenses[0]?.member?.name) && (
+            <p className="mb-3 text-base font-semibold text-gray-800">
+              {memberName ?? listExpenses[0]?.member?.name}
+            </p>
+          )}
+          <ul className="space-y-3">
           {visibleExpenses.map((expense, idx) => {
             const dateObject = new Date(expense.date);
             const formattedDate = Number.isNaN(dateObject.getTime())
@@ -137,7 +160,7 @@ export const ExpensesList = ({ refreshTrigger, onSuccess }: ExpenseListProps) =>
                       <p id={titleId} className="text-sm font-semibold text-gray-900">
                         {formattedDate}
                       </p>
-                      {expense.member && (
+                      {!memberId && expense.member && (
                         <span className="rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700">
                           {expense.member.name}
                         </span>
@@ -370,6 +393,7 @@ export const ExpensesList = ({ refreshTrigger, onSuccess }: ExpenseListProps) =>
             );
           })}
         </ul>
+        </>
       )}
       {hasMore && (
         <button

@@ -3,9 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/elements/Button";
 
 const NAV_ITEMS = [
-  { id: "user", label: "ユーザー情報" },
   { id: "summary", label: "交通費合計" },
-  { id: "list", label: "交通費一覧" },
   { id: "form", label: "交通費申請" },
   { id: "favorite", label: "お気に入り経路" },
 ];
@@ -26,27 +24,8 @@ export const Header = () => {
       <div className="flex items-center justify-between md:flex-row md:items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">TransiTrack 2</h1>
-          <p className="mt-1 text-sm text-gray-600 sm:text-base">
-            ようこそ、{session?.user?.name}さん
-          </p>
+          <p className="text-sm text-gray-600 md:hidden">{session?.user?.email}</p>
         </div>
-
-        {/* PC用ナビ */}
-        <nav className="hidden md:block">
-          <ul className="flex items-center gap-1 text-sm">
-            {NAV_ITEMS.map(({ id, label }) => (
-              <li key={id}>
-                <button
-                  type="button"
-                  onClick={() => scrollToSection(id)}
-                  className="rounded-lg px-3 py-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
-                >
-                  {label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
 
         <div className="flex items-center gap-2">
           {/* ハンバーガーボタン（モバイルのみ） */}
@@ -60,7 +39,9 @@ export const Header = () => {
             <span className="block h-0.5 w-6 bg-gray-700" />
             <span className="block h-0.5 w-6 bg-gray-700" />
           </button>
-
+          <p className="hidden text-sm text-gray-600 md:block md:text-base">
+            {session?.user?.email}
+          </p>
           <Button
             variant="secondary"
             size="md"
@@ -91,6 +72,7 @@ export const Header = () => {
               </li>
             ))}
           </ul>
+
           <Button
             variant="secondary"
             size="md"

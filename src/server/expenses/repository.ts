@@ -113,8 +113,12 @@ export const getExpenseById = async (id: string) => {
 };
 
 /** 全メンバーの交通費申請一覧を取得（管理者用） */
-export const getAllExpenses = async (options?: { yearMonth?: string }) => {
+export const getAllExpenses = async (options?: { yearMonth?: string; memberId?: string }) => {
   const where: Prisma.ExpenseWhereInput = {};
+
+  if (options?.memberId) {
+    where.memberId = options.memberId;
+  }
 
   if (options?.yearMonth) {
     const yearMonthPattern = /^\d{4}-(0[1-9]|1[0-2])$/;

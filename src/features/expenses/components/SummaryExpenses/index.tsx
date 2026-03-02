@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { getExpenses } from "@/features/expenses/apiClient";
 import { useCsvDownload } from "@/features/expenses/hooks/useCsvDownload";
 import type { ExpenseRecord } from "@/types/expenses";
-import { getCurrentYearMonth } from "@/features/expenses/utils/getCurrentYearMonth";
 import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpenseRecords";
+import { useSharedYearMonth } from "@/features/expenses/hooks/useSharedYearMonth";
 import { MdDownload } from "react-icons/md";
 
 interface SummaryExpensesProps {
@@ -39,7 +41,14 @@ const buildMemberSummary = (expenses: ExpenseRecord[]): [string, MemberSummaryIt
   return Object.entries(summary);
 };
 
-const AdminSummary = ({ expenses }: { expenses: ExpenseRecord[] }) => {
+const AdminSummary = ({
+  expenses,
+  yearMonth,
+}: {
+  expenses: ExpenseRecord[];
+  yearMonth: string;
+}) => {
+  const router = useRouter();
   const summaryList = buildMemberSummary(expenses);
 
   if (summaryList.length === 0) {
@@ -58,10 +67,12 @@ const AdminSummary = ({ expenses }: { expenses: ExpenseRecord[] }) => {
         </thead>
         <tbody className="divide-y divide-gray-100">
           {summaryList.map(([memberId, data]) => (
-            <tr key={memberId} className="hover:bg-gray-50">
-              <td className="px-4 py-3 whitespace-nowrap">
-                <div className="font-medium text-gray-900">{data.name}</div>
-              </td>
+            <tr
+              key={memberId}
+              className="cursor-pointer hover:bg-gray-50"
+              onClick={() => router.push(`/expenses?month=${yearMonth}&memberId=${memberId}&memberName=${encodeURIComponent(data.name)}`)}
+            >
+              <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{data.name}</td>
               <td className="px-4 py-3">
                 <div className="text-xs text-gray-500">{data.email}</div>
               </td>
@@ -76,11 +87,14 @@ const AdminSummary = ({ expenses }: { expenses: ExpenseRecord[] }) => {
   );
 };
 
-const UserSummary = ({ expenses }: { expenses: ExpenseRecord[] }) => {
+const UserSummary = ({ expenses, yearMonth }: { expenses: ExpenseRecord[]; yearMonth: string }) => {
   const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   return (
-    <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+    <Link
+      href={`/expenses?month=${yearMonth}`}
+      className="flex cursor-pointer items-center justify-between rounded-lg bg-gray-50 p-4 hover:bg-gray-100"
+    >
       <div>
         <p className="text-sm font-medium text-gray-500">合計金額</p>
         <p className="text-2xl font-bold text-gray-900 sm:text-3xl">
@@ -88,13 +102,13 @@ const UserSummary = ({ expenses }: { expenses: ExpenseRecord[] }) => {
           <span className="ml-1 text-lg font-normal text-gray-600">円</span>
         </p>
       </div>
-    </div>
+    </Link>
   );
 };
 
 export const SummaryExpenses = ({ refreshTrigger }: SummaryExpensesProps) => {
   const { data: session } = useSession();
-  const [summaryYearMonth, setSummaryYearMonth] = useState<string>(getCurrentYearMonth());
+  const [summaryYearMonth, setSummaryYearMonth] = useSharedYearMonth();
   const [summaryExpenses, setSummaryExpenses] = useState<ExpenseRecord[]>([]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: 申請が成功した時のリフレッシュトリガーを追加
@@ -145,9 +159,9 @@ export const SummaryExpenses = ({ refreshTrigger }: SummaryExpensesProps) => {
         </div>
       </div>
       {session?.user?.isAdmin ? (
-        <AdminSummary expenses={summaryExpenses} />
+        <AdminSummary expenses={summaryExpenses} yearMonth={summaryYearMonth} />
       ) : (
-        <UserSummary expenses={summaryExpenses} />
+        <UserSummary expenses={summaryExpenses} yearMonth={summaryYearMonth} />
       )}
     </>
   );
