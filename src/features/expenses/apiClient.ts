@@ -53,8 +53,11 @@ export const createExpense = async (params: ExpenseInput): Promise<ExpenseRespon
   return res.json();
 };
 
-export const getExpenses = async (yearMonth?: string): Promise<ExpenseResponse> => {
-  const queryParams = yearMonth ? `?yearMonth=${encodeURIComponent(yearMonth)}` : "";
+export const getExpenses = async (yearMonth?: string, memberId?: string): Promise<ExpenseResponse> => {
+  const params = new URLSearchParams();
+  if (yearMonth) params.set("yearMonth", yearMonth);
+  if (memberId) params.set("memberId", memberId);
+  const queryParams = params.toString() ? `?${params.toString()}` : "";
   const res = await fetch(`/api/expenses${queryParams}`, {
     method: "GET",
     headers: {

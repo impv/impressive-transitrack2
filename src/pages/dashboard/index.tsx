@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { useToast } from "@/hooks/useToast";
 import { SummaryExpenses } from "@/features/expenses/components/SummaryExpenses";
 import { Toast } from "@/components/elements/Toast";
-import { ExpensesList } from "@/features/expenses/components/ExpensesList";
 import { ExpenseForm } from "@/features/expenses/components/ExpenseForm";
 import { Header } from "@/components/elements/Header";
 import { Card } from "@/components/elements/Card";
@@ -74,11 +73,6 @@ const Dashboard = () => {
         {/* 交通費合計カード */}
         <Card className="mt-6 sm:mt-8">
           <SummaryExpenses refreshTrigger={refreshTrigger} />
-        </Card>
-
-        {/* 交通費申請リストカード */}
-        <Card className="mt-6 sm:mt-8">
-          <ExpensesList refreshTrigger={refreshTrigger} onSuccess={handleSubmit} />
         </Card>
 
         {/* 交通費申請フォームカード */}
