@@ -21,12 +21,14 @@ const INITIAL_FORM_STATE: ExpenseInput = {
 
 interface UseExpenseFormResult {
   expenseForm: ExpenseInput;
-  setExpenseForm: Dispatch<SetStateAction<ExpenseInput>>;
-  handleSubmitExpense: (event: FormEvent) => Promise<void>;
-  resetForm: () => void;
   isSubmitting: boolean;
   submitErrors: string[];
   submitSuccess: boolean;
+  setExpenseForm: Dispatch<SetStateAction<ExpenseInput>>;
+  handleSubmitExpense: (event: FormEvent) => Promise<void>;
+  submitExpense: () => Promise<void>;
+  validateAndShowErrors: () => boolean;
+  resetForm: () => void;
 }
 
 export const useExpenseForm = (onSuccess: (action: SubmitAction) => void): UseExpenseFormResult => {
@@ -44,48 +46,56 @@ export const useExpenseForm = (onSuccess: (action: SubmitAction) => void): UseEx
     };
   }, []);
 
+  const validateAndShowErrors = useCallback(() => {
+    setSubmitErrors([]);
+    setSubmitSuccess(false);
+
+    const errors = validate(
+      validateRequired({
+        date: expenseForm.date,
+        departure: expenseForm.departure,
+        arrival: expenseForm.arrival,
+        amount: expenseForm.amount,
+      }),
+      validateAmount(expenseForm.amount),
+      validateDate(expenseForm.date),
+      validateNotFutureDate(expenseForm.date),
+    );
+
+    if (errors.length > 0) {
+      setSubmitErrors(errors);
+      return false;
+    }
+    return true;
+  }, [expenseForm]);
+
+  const submitExpense = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      await createExpense(expenseForm);
+      setSubmitSuccess(true);
+      setExpenseForm(INITIAL_FORM_STATE);
+      onSuccess("save");
+
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+      successTimeoutRef.current = setTimeout(() => setSubmitSuccess(false), 3000);
+    } catch (error) {
+      console.error("交通費申請の送信に失敗しました", error);
+      setSubmitErrors([error instanceof Error ? error.message : "交通費申請の送信に失敗しました"]);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [expenseForm, onSuccess]);
+
   const handleSubmitExpense = useCallback(
     async (event: FormEvent) => {
       event.preventDefault();
-      setSubmitErrors([]);
-      setSubmitSuccess(false);
-
-      const errors = validate(
-        validateRequired({
-          date: expenseForm.date,
-          departure: expenseForm.departure,
-          arrival: expenseForm.arrival,
-          amount: expenseForm.amount,
-        }),
-        validateAmount(expenseForm.amount),
-        validateDate(expenseForm.date),
-        validateNotFutureDate(expenseForm.date),
-      );
-      if (errors.length > 0) {
-        setSubmitErrors(errors);
-        return;
-      }
-
-      setIsSubmitting(true);
-
-      try {
-        await createExpense(expenseForm);
-        setSubmitSuccess(true);
-        setExpenseForm(INITIAL_FORM_STATE);
-        onSuccess("save");
-
-        if (successTimeoutRef.current) {
-          clearTimeout(successTimeoutRef.current);
-        }
-        successTimeoutRef.current = setTimeout(() => setSubmitSuccess(false), 3000);
-      } catch (error) {
-        console.error("交通費申請の送信に失敗しました", error);
-        setSubmitErrors([error instanceof Error ? error.message : "交通費申請の送信に失敗しました"]);
-      } finally {
-        setIsSubmitting(false);
-      }
+      if (!validateAndShowErrors()) return;
+      await submitExpense();
     },
-    [expenseForm, onSuccess],
+    [validateAndShowErrors, submitExpense],
   );
 
   const resetForm = () => {
@@ -96,11 +106,13 @@ export const useExpenseForm = (onSuccess: (action: SubmitAction) => void): UseEx
 
   return {
     expenseForm,
-    setExpenseForm,
-    handleSubmitExpense,
-    resetForm,
     isSubmitting,
     submitErrors,
     submitSuccess,
+    setExpenseForm,
+    handleSubmitExpense,
+    submitExpense,
+    validateAndShowErrors,
+    resetForm,
   };
 };
