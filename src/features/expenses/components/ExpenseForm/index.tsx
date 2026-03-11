@@ -1,11 +1,13 @@
 import type { FC, FormEvent } from "react";
 import { useState } from "react";
+import Link from "next/link";
 import {
   MdArrowRightAlt,
   MdCalendarToday,
   MdCheckCircle,
   MdDirectionsBus,
   MdError,
+  MdFormatListBulleted,
   MdReceipt,
   MdStar,
   MdSyncAlt,
@@ -127,13 +129,22 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
       />
 
       {/* ヘッダー */}
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg shrink-0">
-          <MdReceipt className="text-blue-600" size={18} />
+      <div className="flex justify-between items-center mb-5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg shrink-0">
+            <MdReceipt className="text-blue-600" size={18} />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="form">
+            交通費申請
+          </h2>
         </div>
-        <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="form">
-          交通費申請
-        </h2>
+        <Link
+          href="/expenses"
+          className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+        >
+          <MdFormatListBulleted size={16} />
+          申請一覧
+        </Link>
       </div>
 
       {/* エラーメッセージ */}
@@ -273,9 +284,7 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
                       id="arrival"
                       type="text"
                       value={expenseForm.arrival}
-                      onChange={(e) =>
-                        setExpenseForm({ ...expenseForm, arrival: e.target.value })
-                      }
+                      onChange={(e) => setExpenseForm({ ...expenseForm, arrival: e.target.value })}
                       placeholder="例: 新宿駅"
                       className="bg-white/80"
                       required

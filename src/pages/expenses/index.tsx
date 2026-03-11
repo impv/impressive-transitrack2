@@ -3,12 +3,12 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
-import { Card } from "@/components/elements/Card";
 import { ScrollToTopButton } from "@/components/elements/ScrollToTopButton";
 import { Toast } from "@/components/elements/Toast";
 import { ExpensesList } from "@/features/expenses/components/ExpensesList";
 import { useToast } from "@/hooks/useToast";
 import type { SubmitAction } from "@/types/expenses";
+import { AdminExpensesList } from "@/features/expenses/components/AdminExpensesList";
 
 const ExpensesPage = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -17,8 +17,6 @@ const ExpensesPage = () => {
   const initialMonth = typeof router.query.month === "string" ? router.query.month : undefined;
   const initialMemberId =
     typeof router.query.memberId === "string" ? router.query.memberId : undefined;
-  const initialMemberName =
-    typeof router.query.memberName === "string" ? router.query.memberName : undefined;
   const { toastMessage, showToast } = useToast();
 
   useEffect(() => {
@@ -63,16 +61,21 @@ const ExpensesPage = () => {
             <IoArrowBack size={20} />
           </Link>
         </div>
-
-        <Card className="mt-4">
+        {session.user.isAdmin ? (
+          <AdminExpensesList
+            refreshTrigger={refreshTrigger}
+            onSuccess={handleSuccess}
+            initialYearMonth={initialMonth}
+            initialMemberId={initialMemberId}
+          />
+        ) : (
           <ExpensesList
             refreshTrigger={refreshTrigger}
             onSuccess={handleSuccess}
             initialYearMonth={initialMonth}
             memberId={initialMemberId}
-            memberName={initialMemberName}
           />
-        </Card>
+        )}
 
         {toastMessage && <Toast toastMessage={toastMessage} />}
         <ScrollToTopButton />
