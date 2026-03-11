@@ -1,5 +1,5 @@
 import { TransportType, TripType } from "@prisma/client";
-import type { ExpenseResponseItem } from "../apiClient";
+import type { ExpenseResponseItem } from "@/features/expenses/apiClient";
 import type { ExpenseRecord } from "@/types/expenses";
 
 const VALID_TRANSPORTS = Object.values(TransportType) as string[];

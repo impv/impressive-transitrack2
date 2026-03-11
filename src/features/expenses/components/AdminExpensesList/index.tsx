@@ -6,8 +6,8 @@ import { Card } from "@/components/elements/Card";
 import { ExpenseItem } from "@/features/expenses/components/ExpenseItem";
 import { useExpenseEdit } from "@/features/expenses/hooks/useExpenseEdit";
 import type { ExpenseRecord, SubmitAction } from "@/types/expenses";
-import { getExpenses } from "../../apiClient";
-import { normalizeExpenseRecords } from "../../utils/normalizeExpenseRecords";
+import { getExpenses } from "@/features/expenses/apiClient";
+import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpenseRecords";
 
 interface AdminExpensesListProps {
   /**
