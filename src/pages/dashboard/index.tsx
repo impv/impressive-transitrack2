@@ -70,37 +70,43 @@ const Dashboard = () => {
         {/* ヘッダー */}
         <Header />
 
-        {/* 交通費合計カード */}
-        <Card className="mt-6 sm:mt-8">
-          <SummaryExpenses refreshTrigger={refreshTrigger} />
-        </Card>
-
         {/* 交通費申請フォームカード */}
-        <Card className="mt-6 sm:mt-8">
-          <ExpenseForm
-            onSuccess={handleSubmit}
-            favorites={favorites}
-            isFavoriteSaving={isFavoriteSaving}
-            saveFromExpenseForm={saveFromExpenseForm}
-          />
-        </Card>
+        {!session.user.isAdmin ? (
+          <Card className="mt-6 sm:mt-8">
+            <ExpenseForm
+              onSuccess={handleSubmit}
+              favorites={favorites}
+              isFavoriteSaving={isFavoriteSaving}
+              saveFromExpenseForm={saveFromExpenseForm}
+            />
+          </Card>
+        ) : null}
+
+        {/* 交通費合計一覧 */}
+        {session.user.isAdmin ? (
+          <Card className="mt-6 sm:mt-8">
+            <SummaryExpenses refreshTrigger={refreshTrigger} />
+          </Card>
+        ) : null}
 
         {/* お気に入り経路管理カード */}
-        <Card className="mt-6 sm:mt-8">
-          <FavoriteRouteManagement
-            favorites={favorites}
-            isFavoritesLoading={isFavoritesLoading}
-            favoriteForm={favoriteForm}
-            editingFavoriteId={editingFavoriteId}
-            isFavoriteSaving={isFavoriteSaving}
-            favoriteSaveError={favoriteSaveError}
-            setFavoriteForm={setFavoriteForm}
-            handleSaveFavorite={handleSaveFavorite}
-            handleEditFavorite={handleEditFavorite}
-            handleDeleteFavorite={handleDeleteFavorite}
-            handleCancelEdit={handleCancelEdit}
-          />
-        </Card>
+        {!session.user.isAdmin ? (
+          <Card className="mt-6 sm:mt-8">
+            <FavoriteRouteManagement
+              favorites={favorites}
+              isFavoritesLoading={isFavoritesLoading}
+              favoriteForm={favoriteForm}
+              editingFavoriteId={editingFavoriteId}
+              isFavoriteSaving={isFavoriteSaving}
+              favoriteSaveError={favoriteSaveError}
+              setFavoriteForm={setFavoriteForm}
+              handleSaveFavorite={handleSaveFavorite}
+              handleEditFavorite={handleEditFavorite}
+              handleDeleteFavorite={handleDeleteFavorite}
+              handleCancelEdit={handleCancelEdit}
+            />
+          </Card>
+        ) : null}
 
         {/* トースト */}
         {toastMessage && <Toast toastMessage={toastMessage} />}

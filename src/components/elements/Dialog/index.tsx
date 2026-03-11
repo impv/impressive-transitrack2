@@ -33,7 +33,6 @@ interface DialogProps {
 export const Dialog = ({ className, title, content, footer, isVisible = false, onClose }: DialogProps) => {
   return (
     <RadixDialog.Root open={isVisible} onOpenChange={(open) => { if (!open) onClose?.(); }}>
-      <RadixDialog.Trigger />
       <RadixDialog.Portal>
         <RadixDialog.Overlay className="fixed inset-0 bg-black opacity-50 z-40" />
         <RadixDialog.Content
