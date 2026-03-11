@@ -9,6 +9,7 @@ import { useExpenseEdit } from "@/features/expenses/hooks/useExpenseEdit";
 import { useSharedYearMonth } from "@/features/expenses/hooks/useSharedYearMonth";
 import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpenseRecords";
 import type { ExpenseRecord, SubmitAction } from "@/types/expenses";
+import { MdReceipt } from "react-icons/md";
 
 // 交通費申請一覧カードコンポーネント
 interface ExpenseListProps {
@@ -105,9 +106,14 @@ export const ExpensesList = ({
   return (
     <Card className="mt-4">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="list">
-          交通費申請一覧
-        </h2>
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg shrink-0">
+            <MdReceipt className="text-blue-600" size={18} />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="list">
+            交通費申請一覧
+          </h2>
+        </div>
         <div className="flex items-center gap-2">
           <label htmlFor="yearMonthInput" className="text-sm font-medium text-gray-700">
             表示期間:
