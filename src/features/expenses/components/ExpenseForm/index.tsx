@@ -142,17 +142,17 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
         <div className="flex items-center gap-1.5">
           <Link
             href="/expenses"
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 sm:px-3 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
           >
             <MdFormatListBulleted size={16} />
-            申請一覧
+            <span className="hidden sm:inline">申請一覧</span>
           </Link>
           <Link
             href="/favoriteRoute"
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 sm:px-3 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
           >
             <MdStar size={16} />
-            お気に入り経路
+            <span className="hidden sm:inline">お気に入り経路</span>
           </Link>
         </div>
       </div>
