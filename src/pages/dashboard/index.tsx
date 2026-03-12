@@ -52,7 +52,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-4xl pb-20 lg:pb-0">
         {/* ヘッダー */}
         <Header />
 

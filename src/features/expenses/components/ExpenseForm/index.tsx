@@ -204,6 +204,15 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
                   transport: selected.transport,
                   tripType: selected.tripType,
                 });
+              } else {
+                setExpenseForm((prev) => ({
+                  ...prev,
+                  departure: "",
+                  arrival: "",
+                  amount: 0,
+                  transport: "TRAIN",
+                  tripType: "ONEWAY",
+                }));
               }
             }}
             className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-amber-400 focus:outline-none"

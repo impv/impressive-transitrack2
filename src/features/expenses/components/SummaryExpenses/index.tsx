@@ -6,7 +6,7 @@ import { useCsvDownload } from "@/features/expenses/hooks/useCsvDownload";
 import type { ExpenseRecord } from "@/types/expenses";
 import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpenseRecords";
 import { useSharedYearMonth } from "@/features/expenses/hooks/useSharedYearMonth";
-import { MdDownload, MdArrowForward } from "react-icons/md";
+import { MdDownload, MdArrowForward, MdCurrencyYen } from "react-icons/md";
 
 interface SummaryExpensesProps {
   /**
@@ -68,9 +68,14 @@ export const SummaryExpenses = ({ refreshTrigger }: SummaryExpensesProps) => {
   return (
     <>
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="summary">
-          交通費合計
-        </h2>
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg shrink-0">
+            <MdCurrencyYen className="text-blue-600" size={18} />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="summary">
+            交通費合計
+          </h2>
+        </div>
         <div className="flex items-center gap-2">
           <label htmlFor="summaryYearMonthInput" className="text-sm font-medium text-gray-700">
             表示期間:

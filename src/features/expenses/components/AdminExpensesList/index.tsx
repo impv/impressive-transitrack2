@@ -1,13 +1,13 @@
 import type { TransportType, TripType } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import { Card } from "@/components/elements/Card";
 import { ExpenseItem } from "@/features/expenses/components/ExpenseItem";
 import { useExpenseEdit } from "@/features/expenses/hooks/useExpenseEdit";
 import type { ExpenseRecord, SubmitAction } from "@/types/expenses";
 import { getExpenses } from "@/features/expenses/apiClient";
 import { normalizeExpenseRecords } from "@/features/expenses/utils/normalizeExpenseRecords";
+import { MdReceipt } from "react-icons/md";
 
 interface AdminExpensesListProps {
   /**
@@ -44,7 +44,6 @@ export const AdminExpensesList = ({
   const [listYearMonth, setListYearMonth] = useState(initialYearMonth);
   const [listExpenses, setListExpenses] = useState<ExpenseRecord[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState(initialMemberId);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: refreshTrigger を依存配列に含めると無限ループになるため除外
   useEffect(() => {
@@ -113,22 +112,20 @@ export const AdminExpensesList = ({
     (expense) => expense.memberId === selectedMemberId,
   );
 
-  // リストの初期表示件数
-  const INITIAL_DISPLAY_COUNT = 4;
-  const visibleExpenses = isExpanded
-    ? displayedMemberExpenses
-    : displayedMemberExpenses.slice(0, INITIAL_DISPLAY_COUNT);
-  const hasMore = displayedMemberExpenses.length > INITIAL_DISPLAY_COUNT;
-
   const selectedMember = submittedMembers.find((m) => m.id === selectedMemberId);
 
   return (
     <Card className="mt-4">
       {/* ヘッダー */}
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="list">
-          交通費申請一覧
-        </h2>
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg shrink-0">
+            <MdReceipt className="text-blue-600" size={18} />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="list">
+            交通費申請一覧
+          </h2>
+        </div>
         <div className="flex items-center gap-2">
           <label htmlFor="yearMonthInput" className="text-sm font-medium text-gray-700">
             表示期間:
@@ -162,7 +159,6 @@ export const AdminExpensesList = ({
                       type="button"
                       onClick={() => {
                         setSelectedMemberId(member.id);
-                        setIsExpanded(false);
                       }}
                       className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
                         isSelected ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-100"
@@ -195,11 +191,22 @@ export const AdminExpensesList = ({
             </>
           ) : (
             <>
-              {selectedMember && (
-                <p className="mb-3 text-base font-semibold text-gray-800">{selectedMember.name}</p>
-              )}
+              <div className="mb-3 flex items-center justify-between">
+                {selectedMember && (
+                  <p className="text-base font-semibold text-gray-800">{selectedMember.name}</p>
+                )}
+                <div className="rounded-lg bg-blue-50 px-4 py-2 text-sm">
+                  <span className="font-medium text-gray-600">合計: </span>
+                  <span className="font-bold text-blue-700">
+                    {displayedMemberExpenses
+                      .reduce((sum, e) => sum + e.amount, 0)
+                      .toLocaleString("ja-JP")}
+                    円
+                  </span>
+                </div>
+              </div>
               <ul className="space-y-3">
-                {visibleExpenses.map((expense, idx) => (
+                {listExpenses.map((expense, idx) => (
                   <li key={expense.id}>
                     <ExpenseItem
                       expense={expense}
@@ -217,37 +224,6 @@ export const AdminExpensesList = ({
                   </li>
                 ))}
               </ul>
-              {hasMore && (
-                <button
-                  type="button"
-                  onClick={() => setIsExpanded((v) => !v)}
-                  className="mt-3 flex w-full items-center justify-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-                >
-                  {isExpanded ? (
-                    <>
-                      <MdExpandLess size={20} />
-                      閉じる
-                    </>
-                  ) : (
-                    <>
-                      <MdExpandMore size={20} />他{" "}
-                      {displayedMemberExpenses.length - INITIAL_DISPLAY_COUNT} 件を表示
-                    </>
-                  )}
-                </button>
-              )}
-              {/* 合計 */}
-              <div className="mt-4 flex justify-end">
-                <div className="rounded-lg bg-blue-50 px-4 py-2 text-sm">
-                  <span className="font-medium text-gray-600">合計: </span>
-                  <span className="font-bold text-blue-700">
-                    {displayedMemberExpenses
-                      .reduce((sum, e) => sum + e.amount, 0)
-                      .toLocaleString("ja-JP")}
-                    円
-                  </span>
-                </div>
-              </div>
             </>
           )}
         </div>
