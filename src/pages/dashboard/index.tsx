@@ -7,7 +7,6 @@ import { ExpenseForm } from "@/features/expenses/components/ExpenseForm";
 import { Header } from "@/components/elements/Header";
 import { Card } from "@/components/elements/Card";
 import { useCallback, useEffect, useState } from "react";
-import { FavoriteRouteManagement } from "@/features/expenses/components/FavoriteRouteManagement";
 import { useFavoriteRoutes } from "@/features/expenses/hooks/useFavoriteRoutes";
 import { ScrollToTopButton } from "@/components/elements/ScrollToTopButton";
 import type { SubmitAction } from "@/types/expenses";
@@ -15,20 +14,7 @@ import type { SubmitAction } from "@/types/expenses";
 const Dashboard = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { data: session, status } = useSession();
-  const {
-    favorites,
-    isLoading: isFavoritesLoading,
-    favoriteForm,
-    editingFavoriteId,
-    isSaving: isFavoriteSaving,
-    saveError: favoriteSaveError,
-    setFavoriteForm,
-    handleSaveFavorite,
-    handleEditFavorite,
-    handleDeleteFavorite,
-    handleCancelEdit,
-    saveFromExpenseForm,
-  } = useFavoriteRoutes();
+  const { favorites, isSaving: isFavoriteSaving, saveFromExpenseForm } = useFavoriteRoutes();
   const router = useRouter();
 
   useEffect(() => {
@@ -86,25 +72,6 @@ const Dashboard = () => {
         {session.user.isAdmin ? (
           <Card className="mt-6 sm:mt-8">
             <SummaryExpenses refreshTrigger={refreshTrigger} />
-          </Card>
-        ) : null}
-
-        {/* お気に入り経路管理カード */}
-        {!session.user.isAdmin ? (
-          <Card className="mt-6 sm:mt-8">
-            <FavoriteRouteManagement
-              favorites={favorites}
-              isFavoritesLoading={isFavoritesLoading}
-              favoriteForm={favoriteForm}
-              editingFavoriteId={editingFavoriteId}
-              isFavoriteSaving={isFavoriteSaving}
-              favoriteSaveError={favoriteSaveError}
-              setFavoriteForm={setFavoriteForm}
-              handleSaveFavorite={handleSaveFavorite}
-              handleEditFavorite={handleEditFavorite}
-              handleDeleteFavorite={handleDeleteFavorite}
-              handleCancelEdit={handleCancelEdit}
-            />
           </Card>
         ) : null}
 

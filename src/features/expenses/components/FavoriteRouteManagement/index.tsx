@@ -5,6 +5,26 @@ import { Button } from "@/components/elements/Button";
 import { Input } from "@/components/elements/Input";
 import { AiOutlineEdit } from "react-icons/ai";
 import { AiOutlineDelete } from "react-icons/ai";
+import {
+  MdAdd,
+  MdArrowRightAlt,
+  MdDirectionsBus,
+  MdError,
+  MdStar,
+  MdSyncAlt,
+  MdTrain,
+} from "react-icons/md";
+import { twMerge } from "tailwind-merge";
+
+const TRANSPORT_OPTIONS = [
+  { value: "TRAIN" as const, label: "電車", Icon: MdTrain },
+  { value: "BUS" as const, label: "バス", Icon: MdDirectionsBus },
+];
+
+const TRIP_TYPE_OPTIONS = [
+  { value: "ONEWAY" as const, label: "片道", Icon: MdArrowRightAlt },
+  { value: "ROUNDTRIP" as const, label: "往復", Icon: MdSyncAlt },
+];
 
 interface FavoriteRouteManagementProps {
   /**
@@ -48,6 +68,14 @@ interface FavoriteRouteManagementProps {
    */
   handleDeleteFavorite: (id: string) => Promise<void>;
   /**
+   * 新規作成モードかどうか
+   */
+  isCreating: boolean;
+  /**
+   * 新規作成モードを開始する関数
+   */
+  handleStartCreate: () => void;
+  /**
    * 編集キャンセル関数
    */
   handleCancelEdit: () => void;
@@ -58,6 +86,7 @@ export const FavoriteRouteManagement = ({
   isFavoritesLoading,
   favoriteForm,
   editingFavoriteId,
+  isCreating,
   isFavoriteSaving,
   favoriteSaveError,
   setFavoriteForm,
@@ -65,21 +94,45 @@ export const FavoriteRouteManagement = ({
   handleEditFavorite,
   handleDeleteFavorite,
   handleCancelEdit,
+  handleStartCreate,
 }: FavoriteRouteManagementProps) => {
+  const showForm = isCreating || !!editingFavoriteId;
   return (
     <>
-      <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl" id="favorite">
-        お気に入り経路
-      </h2>
+      <div className="mb-4 flex items-center gap-2.5">
+        <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg shrink-0">
+          <MdStar className="text-blue-600" size={18} />
+        </div>
+        <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="favorite">
+          お気に入り経路
+        </h2>
+      </div>
 
-      {/* 編集フォーム（編集モード時のみ表示） */}
-      {editingFavoriteId && <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
-        <h3 className="mb-3 text-sm font-semibold text-gray-800">
-          {editingFavoriteId ? "お気に入り経路を編集" : "お気に入り経路を登録"}
-        </h3>
-        <div className="space-y-3">
+      {/* 新規登録ボタン（フォーム非表示時のみ表示） */}
+      {!showForm && (
+        <button
+          type="button"
+          onClick={handleStartCreate}
+          className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue-200 bg-blue-50 py-3 text-sm font-semibold text-blue-600 transition-colors hover:border-blue-300 hover:bg-blue-100"
+        >
+          <MdAdd size={18} />
+          新規登録
+        </button>
+      )}
+
+      {/* 編集・新規作成フォーム */}
+      {showForm && (
+        <div className="mb-6 space-y-4">
+          <h3 className="text-sm font-semibold text-gray-800">
+            {editingFavoriteId ? "お気に入り経路を編集" : "お気に入り経路を新規登録"}
+          </h3>
+
+          {/* 名前 */}
           <div>
-            <label htmlFor="favName" className="mb-1 block text-xs font-medium text-gray-600">
+            <label
+              htmlFor="favName"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
               名前（任意）
             </label>
             <Input
@@ -90,136 +143,187 @@ export const FavoriteRouteManagement = ({
               placeholder="例: よく使う経路（東京駅↔︎渋谷駅）"
             />
           </div>
+
+          {/* 経路 */}
           <div>
-            <label htmlFor="favDeparture" className="mb-1 block text-xs font-medium text-gray-600">
-              出発
-            </label>
-            <Input
-              id="favDeparture"
-              type="text"
-              value={favoriteForm.departure}
-              onChange={(e) => setFavoriteForm({ ...favoriteForm, departure: e.target.value })}
-              placeholder="例: 東京駅"
-              required
-            />
+            <p className="mb-1.5 text-sm font-medium text-gray-700">経路</p>
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+              <div className="flex items-stretch gap-3">
+                {/* 路線インジケーター */}
+                <div className="flex flex-col items-center mt-7">
+                  <div className="w-2.5 h-2.5 rounded-full bg-blue-400 ring-2 ring-blue-200 shrink-0" />
+                  <div className="flex-1 w-px bg-gradient-to-b from-blue-300 to-blue-500 min-h-10 my-1" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-blue-600 ring-2 ring-blue-300 shrink-0" />
+                </div>
+                {/* 入力フィールド */}
+                <div className="flex-1 space-y-3">
+                  <div>
+                    <label
+                      htmlFor="favDeparture"
+                      className="mb-1 block text-[10px] font-semibold text-blue-500 uppercase tracking-wide"
+                    >
+                      出発
+                    </label>
+                    <Input
+                      id="favDeparture"
+                      type="text"
+                      value={favoriteForm.departure}
+                      onChange={(e) =>
+                        setFavoriteForm({ ...favoriteForm, departure: e.target.value })
+                      }
+                      placeholder="例: 東京駅"
+                      className="bg-white/80"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="favArrival"
+                      className="mb-1 block text-[10px] font-semibold text-blue-700 uppercase tracking-wide"
+                    >
+                      到着
+                    </label>
+                    <Input
+                      id="favArrival"
+                      type="text"
+                      value={favoriteForm.arrival}
+                      onChange={(e) =>
+                        setFavoriteForm({ ...favoriteForm, arrival: e.target.value })
+                      }
+                      placeholder="例: 渋谷駅"
+                      className="bg-white/80"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* 運賃 */}
           <div>
-            <label htmlFor="favArrival" className="mb-1 block text-xs font-medium text-gray-600">
-              到着
+            <label htmlFor="favAmount" className="mb-1.5 block text-sm font-medium text-gray-700">
+              運賃
             </label>
-            <Input
-              id="favArrival"
-              type="text"
-              value={favoriteForm.arrival}
-              onChange={(e) => setFavoriteForm({ ...favoriteForm, arrival: e.target.value })}
-              placeholder="例: 渋谷駅"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="favAmount" className="mb-1 block text-xs font-medium text-gray-600">
-              運賃（円）
-            </label>
-            <Input
-              id="favAmount"
-              type="number"
-              value={favoriteForm.amount}
-              onChange={(e) => setFavoriteForm({ ...favoriteForm, amount: Number(e.target.value) })}
-              min="1"
-              step="1"
-              required
-            />
-          </div>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="radio"
-                name="favTransport"
-                value="TRAIN"
-                checked={favoriteForm.transport === "TRAIN"}
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium pointer-events-none select-none">
+                ¥
+              </span>
+              <Input
+                id="favAmount"
+                type="text"
+                value={favoriteForm.amount || ""}
                 onChange={(e) =>
-                  setFavoriteForm({
-                    ...favoriteForm,
-                    transport: e.target.value as "TRAIN" | "BUS",
-                  })
+                  setFavoriteForm({ ...favoriteForm, amount: Number(e.target.value) })
                 }
+                placeholder="例: 200"
+                className="pl-7"
+                required
               />
-              電車
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="radio"
-                name="favTransport"
-                value="BUS"
-                checked={favoriteForm.transport === "BUS"}
-                onChange={(e) =>
-                  setFavoriteForm({
-                    ...favoriteForm,
-                    transport: e.target.value as "TRAIN" | "BUS",
-                  })
-                }
-              />
-              バス
-            </label>
+            </div>
           </div>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="radio"
-                name="favTripType"
-                value="ONEWAY"
-                checked={favoriteForm.tripType === "ONEWAY"}
-                onChange={(e) =>
-                  setFavoriteForm({
-                    ...favoriteForm,
-                    tripType: e.target.value as "ONEWAY" | "ROUNDTRIP",
-                  })
-                }
-              />
-              片道
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="radio"
-                name="favTripType"
-                value="ROUNDTRIP"
-                checked={favoriteForm.tripType === "ROUNDTRIP"}
-                onChange={(e) =>
-                  setFavoriteForm({
-                    ...favoriteForm,
-                    tripType: e.target.value as "ONEWAY" | "ROUNDTRIP",
-                  })
-                }
-              />
-              往復
-            </label>
+
+          {/* 交通手段 & 区間種別 */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* 交通手段 */}
+            <fieldset>
+              <legend className="mb-2 block text-sm font-medium text-gray-700">交通手段</legend>
+              <div className="grid grid-cols-2 gap-1.5">
+                {TRANSPORT_OPTIONS.map(({ value, label, Icon }) => (
+                  <label
+                    key={value}
+                    className={twMerge(
+                      "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all cursor-pointer",
+                      favoriteForm.transport === value
+                        ? "border-blue-500 bg-blue-50 text-blue-700"
+                        : "border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:bg-gray-50",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="favTransport"
+                      value={value}
+                      checked={favoriteForm.transport === value}
+                      onChange={(e) =>
+                        setFavoriteForm({
+                          ...favoriteForm,
+                          transport: e.target.value as "TRAIN" | "BUS",
+                        })
+                      }
+                      className="sr-only"
+                    />
+                    <Icon size={20} />
+                    <span className="text-xs font-semibold">{label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {/* 区間種別 */}
+            <fieldset>
+              <legend className="mb-2 block text-sm font-medium text-gray-700">区間種別</legend>
+              <div className="grid grid-cols-2 gap-1.5">
+                {TRIP_TYPE_OPTIONS.map(({ value, label, Icon }) => (
+                  <label
+                    key={value}
+                    className={twMerge(
+                      "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all cursor-pointer",
+                      favoriteForm.tripType === value
+                        ? "border-blue-500 bg-blue-50 text-blue-700"
+                        : "border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:bg-gray-50",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="favTripType"
+                      value={value}
+                      checked={favoriteForm.tripType === value}
+                      onChange={(e) =>
+                        setFavoriteForm({
+                          ...favoriteForm,
+                          tripType: e.target.value as "ONEWAY" | "ROUNDTRIP",
+                        })
+                      }
+                      className="sr-only"
+                    />
+                    <Icon size={20} />
+                    <span className="text-xs font-semibold">{label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           </div>
+
+          {/* エラーメッセージ */}
           {favoriteSaveError && (
-            <div className="rounded-lg bg-red-50 p-2 text-xs text-red-800">{favoriteSaveError}</div>
+            <div className="flex gap-2.5 rounded-xl bg-red-50 p-3.5 border border-red-100">
+              <MdError className="text-red-400 shrink-0 mt-0.5" size={16} />
+              <p className="text-sm text-red-700">{favoriteSaveError}</p>
+            </div>
           )}
-          <div className="flex gap-2">
-            {editingFavoriteId && (
-              <Button
-                variant="secondary"
-                size="md"
-                onClick={handleCancelEdit}
-                className="rounded-md border-gray-200 text-gray-600 shadow-none hover:bg-gray-100 hover:shadow-none"
-              >
-                キャンセル
-              </Button>
-            )}
+
+          {/* ボタン */}
+          <div className="flex gap-2 pt-1">
             <Button
               variant="primary"
-              size="md"
+              size="lg"
+              className="flex-1"
               onClick={handleSaveFavorite}
               disabled={isFavoriteSaving}
-              className="rounded-md px-4"
             >
               {isFavoriteSaving ? "保存中..." : editingFavoriteId ? "更新する" : "登録する"}
             </Button>
+            <Button
+              variant="secondary"
+              size="lg"
+              className="flex-1"
+              onClick={handleCancelEdit}
+            >
+              キャンセル
+            </Button>
           </div>
         </div>
-      </div>}
+      )}
 
       {/* お気に入り一覧 */}
       {isFavoritesLoading ? (

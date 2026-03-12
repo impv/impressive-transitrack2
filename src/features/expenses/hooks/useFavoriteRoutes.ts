@@ -65,6 +65,14 @@ interface UseFavoriteRoutesResult {
    */
   handleDeleteFavorite: (id: string) => Promise<void>;
   /**
+   * 新規作成モードかどうか
+   */
+  isCreating: boolean;
+  /**
+   * 新規作成モードを開始する関数
+   */
+  handleStartCreate: () => void;
+  /**
    * 編集をキャンセルする関数
    */
   handleCancelEdit: () => void;
@@ -85,6 +93,7 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
 
   const [favoriteForm, setFavoriteForm] = useState<FavoriteRouteInput>(INITIAL_FORM_STATE);
   const [editingFavoriteId, setEditingFavoriteId] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -127,6 +136,7 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
       }
       setFavoriteForm(INITIAL_FORM_STATE);
       setEditingFavoriteId(null);
+      setIsCreating(false);
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "保存に失敗しました");
     } finally {
@@ -168,12 +178,23 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
   }, []);
 
   /**
+   * 新規作成モードを開始する関数
+   */
+  const handleStartCreate = useCallback(() => {
+    setEditingFavoriteId(null);
+    setFavoriteForm(INITIAL_FORM_STATE);
+    setSaveError(null);
+    setIsCreating(true);
+  }, []);
+
+  /**
    * 編集をキャンセルする関数
    */
   const handleCancelEdit = useCallback(() => {
     setEditingFavoriteId(null);
     setFavoriteForm(INITIAL_FORM_STATE);
     setSaveError(null);
+    setIsCreating(false);
   }, []);
 
   /**
@@ -201,6 +222,8 @@ export const useFavoriteRoutes = (): UseFavoriteRoutesResult => {
     isSaving,
     saveError,
     setFavoriteForm,
+    isCreating,
+    handleStartCreate,
     handleSaveFavorite,
     handleEditFavorite,
     handleDeleteFavorite,

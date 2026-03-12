@@ -24,6 +24,7 @@ export const Default: Story = {
     isFavoritesLoading: false,
     favoriteForm: emptyForm,
     editingFavoriteId: null,
+    isCreating: false,
     isFavoriteSaving: false,
     favoriteSaveError: null,
     setFavoriteForm: () => {},
@@ -31,6 +32,7 @@ export const Default: Story = {
     handleEditFavorite: () => {},
     handleDeleteFavorite: async () => {},
     handleCancelEdit: () => {},
+    handleStartCreate: () => {},
   },
 };
 
@@ -40,6 +42,7 @@ export const WithError: Story = {
     isFavoritesLoading: false,
     favoriteForm: emptyForm,
     editingFavoriteId: null,
+    isCreating: true,
     isFavoriteSaving: false,
     favoriteSaveError: "保存に失敗しました。入力内容を確認してください。",
     setFavoriteForm: () => {},
@@ -47,5 +50,6 @@ export const WithError: Story = {
     handleEditFavorite: () => {},
     handleDeleteFavorite: async () => {},
     handleCancelEdit: () => {},
+    handleStartCreate: () => {},
   },
 };

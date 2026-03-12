@@ -8,11 +8,12 @@ import {
   MdDirectionsBus,
   MdError,
   MdFormatListBulleted,
-  MdReceipt,
   MdStar,
   MdSyncAlt,
   MdTrain,
+  MdBorderColor,
 } from "react-icons/md";
+
 import { twMerge } from "tailwind-merge";
 import { useExpenseForm } from "@/features/expenses/hooks/useExpenseForm";
 import { Button } from "@/components/elements/Button";
@@ -132,19 +133,28 @@ export const ExpenseForm: FC<ExpenseFormProps> = ({
       <div className="flex justify-between items-center mb-5">
         <div className="flex items-center gap-2.5">
           <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg shrink-0">
-            <MdReceipt className="text-blue-600" size={18} />
+            <MdBorderColor className="text-blue-600" size={18} />
           </div>
           <h2 className="text-lg font-semibold text-gray-900 sm:text-xl" id="form">
             交通費申請
           </h2>
         </div>
-        <Link
-          href="/expenses"
-          className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
-        >
-          <MdFormatListBulleted size={16} />
-          申請一覧
-        </Link>
+        <div className="flex items-center gap-1.5">
+          <Link
+            href="/expenses"
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 sm:px-3 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+          >
+            <MdFormatListBulleted size={16} />
+            <span className="hidden sm:inline">申請一覧</span>
+          </Link>
+          <Link
+            href="/favoriteRoute"
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 sm:px-3 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+          >
+            <MdStar size={16} />
+            <span className="hidden sm:inline">お気に入り経路</span>
+          </Link>
+        </div>
       </div>
 
       {/* エラーメッセージ */}
