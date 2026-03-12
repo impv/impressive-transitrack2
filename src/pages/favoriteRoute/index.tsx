@@ -22,7 +22,7 @@ const FavoriteRoutePage = () => {
   } = useFavoriteRoutes();
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-4xl pb-20 lg:pb-0">
         <div className="mt-4">
           <Link
             href="/dashboard"
@@ -55,7 +55,3 @@ const FavoriteRoutePage = () => {
 };
 
 export default FavoriteRoutePage;
-
-// お気に入り経路をページとして作成し、フォーム内から遷移できるようボタンを配置 / 各カードのタイトルにアイコンを配置したものをコミット
-// TODO: お気に入り経路のページをリファクタリング
-// TODO: お気に入り経路のページで新規作成できるようにする？

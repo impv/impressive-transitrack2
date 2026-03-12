@@ -10,14 +10,22 @@ import {
 } from "@/lib/validation";
 import type { ExpenseInput, SubmitAction } from "@/types/expenses";
 
-const INITIAL_FORM_STATE: ExpenseInput = {
-  date: "",
+const getTodayString = () => {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, "0");
+  const d = String(today.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const getInitialFormState = (): ExpenseInput => ({
+  date: getTodayString(),
   departure: "",
   arrival: "",
   amount: 0,
   transport: "TRAIN",
   tripType: "ONEWAY",
-};
+});
 
 interface UseExpenseFormResult {
   expenseForm: ExpenseInput;
@@ -32,7 +40,7 @@ interface UseExpenseFormResult {
 }
 
 export const useExpenseForm = (onSuccess: (action: SubmitAction) => void): UseExpenseFormResult => {
-  const [expenseForm, setExpenseForm] = useState<ExpenseInput>(INITIAL_FORM_STATE);
+  const [expenseForm, setExpenseForm] = useState<ExpenseInput>(getInitialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitErrors, setSubmitErrors] = useState<string[]>([]);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -74,7 +82,7 @@ export const useExpenseForm = (onSuccess: (action: SubmitAction) => void): UseEx
     try {
       await createExpense(expenseForm);
       setSubmitSuccess(true);
-      setExpenseForm(INITIAL_FORM_STATE);
+      setExpenseForm(getInitialFormState());
       onSuccess("save");
 
       if (successTimeoutRef.current) {
@@ -99,7 +107,7 @@ export const useExpenseForm = (onSuccess: (action: SubmitAction) => void): UseEx
   );
 
   const resetForm = () => {
-    setExpenseForm(INITIAL_FORM_STATE);
+    setExpenseForm(getInitialFormState());
     setSubmitErrors([]);
     setSubmitSuccess(false);
   };

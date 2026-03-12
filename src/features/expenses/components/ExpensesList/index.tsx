@@ -1,7 +1,6 @@
 import type { TransportType, TripType } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import { Card } from "@/components/elements/Card";
 import { getExpenses } from "@/features/expenses/apiClient";
 import { ExpenseItem } from "@/features/expenses/components/ExpenseItem";
@@ -46,12 +45,6 @@ export const ExpensesList = ({
 
   const [listYearMonth, setListYearMonth] = useSharedYearMonth(initialYearMonth);
   const [listExpenses, setListExpenses] = useState<ExpenseRecord[]>([]);
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  // リストの初期表示件数
-  const INITIAL_DISPLAY_COUNT = 4;
-  const visibleExpenses = isExpanded ? listExpenses : listExpenses.slice(0, INITIAL_DISPLAY_COUNT);
-  const hasMore = listExpenses.length > INITIAL_DISPLAY_COUNT;
 
   // 交通費一覧用のデータ取得
   // biome-ignore lint/correctness/useExhaustiveDependencies: 申請が成功した時のリフレッシュトリガーを追加
@@ -142,7 +135,7 @@ export const ExpensesList = ({
             </p>
           )}
           <ul className="space-y-3">
-            {visibleExpenses.map((expense, idx) => (
+            {listExpenses.map((expense, idx) => (
               <li key={expense.id}>
                 <ExpenseItem
                   expense={expense}
@@ -160,24 +153,6 @@ export const ExpensesList = ({
             ))}
           </ul>
         </>
-      )}
-      {hasMore && (
-        <button
-          type="button"
-          onClick={() => setIsExpanded((v) => !v)}
-          className="mt-3 flex w-full items-center justify-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-        >
-          {isExpanded ? (
-            <>
-              <MdExpandLess size={20} />
-              閉じる
-            </>
-          ) : (
-            <>
-              <MdExpandMore size={20} />他 {listExpenses.length - INITIAL_DISPLAY_COUNT} 件を表示
-            </>
-          )}
-        </button>
       )}
     </Card>
   );
